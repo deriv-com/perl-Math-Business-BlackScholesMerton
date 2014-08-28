@@ -52,73 +52,73 @@ my $q     = 0.001;
 
 my @test_cases = (
     {
-        type     => 'CALL',
+        type     => 'digital_call',
         barriers => [1.36],
         foreign  => 0.3172,
         domestic => 0.3118,
     },
     {
-        type     => 'PUT',
+        type     => 'digital_put',
         barriers => [1.34],
         foreign  => 0.3096,
         domestic => 0.315,
     },
     {
-        type     => 'VANILLA_CALL',
+        type     => 'vanilla_call',
         barriers => [1.34],
         foreign  => 0.0140,
         domestic => 0.0141,
     },
     {
-        type     => 'VANILLA_PUT',
+        type     => 'vanilla_put',
         barriers => [1.34],
         foreign  => 0.0040,
         domestic => 0.0040,
     },
     {
-        type     => 'ONETOUCH',
+        type     => 'one_touch',
         barriers => [1.36],
         foreign  => 0.6307,
         domestic => 0.6261,
     },
     {
-        type     => 'NOTOUCH',
+        type     => 'no_touch',
         barriers => [1.36],
         foreign  => 0.3692,
         domestic => 0.3739,
     },
     {
-        type     => 'EXPIRYRANGE',
+        type     => 'expiry_range',
         barriers => [ 1.36, 1.34 ],
         foreign  => 0.3732,
         domestic => 0.3732,
     },
     {
-        type     => 'EXPIRYMISS',
+        type     => 'expiry_miss',
         barriers => [ 1.36, 1.34 ],
         foreign  => 0.6268,
         domestic => 0.6268,
     },
     {
-        type     => 'RANGE',
+        type     => 'range',
         barriers => [ 1.36, 1.34 ],
         foreign  => 0.006902,
         domestic => 0.006902,
     },
     {
-        type     => 'UPORDOWN',
+        type     => 'up_or_down',
         barriers => [ 1.36, 1.34 ],
         foreign  => 0.993093,
         domestic => 0.993088,
     },
     {
-        type     => 'RANGE',
+        type     => 'range',
         barriers => [ 1.35, 1.34 ],
         foreign  => 0,
         domestic => 0,
     },
     {
-        type     => 'UPORDOWN',
+        type     => 'up_or_down',
         barriers => [ 1.36, 1.35 ],
         foreign  => 1,
         domestic => 1,
@@ -128,7 +128,7 @@ my @test_cases = (
 
 foreach my $test_case (@test_cases) {
     my $formula_name = 'Math::Business::BlackScholes::Binaries::'
-      . ucfirst( lc( $test_case->{type} ) );
+      . $test_case->{type};
     my %probs = (
         domestic => &$formula_name(
             $S, @{ $test_case->{barriers} },

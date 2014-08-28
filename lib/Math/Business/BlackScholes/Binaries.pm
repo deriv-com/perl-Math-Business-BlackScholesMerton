@@ -22,7 +22,7 @@ Version 1.00
 
 Prices options using the GBM model, all closed formulas.
 
-Important(a): Basically, OneTouch, UpOrDown and DoubleTouch have two cases of 
+Important(a): Basically, one_touch, up_or_down and double_touch have two cases of 
 payoff either at end or at hit. We treat them differently. We use parameter 
 $w to differ them.
 
@@ -40,17 +40,17 @@ Paying another currency = correlation is between negative ONE and positive ONE.
 
 See [3] for Quanto formulas and examples
 
-=head2 Vanilla_call
+=head2 vanilla_call
 
     USAGE
-    my $price = Vanilla_call($S, $K, $t, $r_q, $mu, $sigma)
+    my $price = vanilla_call($S, $K, $t, $r_q, $mu, $sigma)
 
     DESCRIPTION
     Price of a Vanilla Call
 
 =cut
 
-sub Vanilla_call {
+sub vanilla_call {
     my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
 
     my $d1 =
@@ -58,23 +58,22 @@ sub Vanilla_call {
       ( $sigma * sqrt($t) );
     my $d2 = $d1 - ( $sigma * sqrt($t) );
 
-    #return (exp(-$q * $t) * $S * pnorm($d1)) - (exp(-$r * $t) * $K * pnorm($d2));
     return
       exp( -$r_q * $t ) *
       ( $S * exp( $mu * $t ) * pnorm($d1) - $K * pnorm($d2) );
 }
 
-=head2 Vanilla_put
+=head2 vanilla_put
 
     USAGE
-    my $price = Vanilla_put($S, $K, $t, $r_q, $mu, sigma)
+    my $price = vanilla_put($S, $K, $t, $r_q, $mu, sigma)
 
     DESCRIPTION
     Price a standard Vanilla Put
 
 =cut
 
-sub Vanilla_put {
+sub vanilla_put {
     my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
 
     my $d1 =
@@ -82,23 +81,38 @@ sub Vanilla_put {
       ( $sigma * sqrt($t) );
     my $d2 = $d1 - ( $sigma * sqrt($t) );
 
-    #return -(exp(-$q * $t) * $S * pnorm(-$d1)) + (exp(-$r * $t) * $K * pnorm(-$d2));
     return -1 *
       exp( -$r_q * $t ) *
       ( $S * exp( $mu * $t ) * pnorm( -$d1 ) - $K * pnorm( -$d2 ) );
 }
 
-=head2 BULL BET
+=head2 digital_call
+
+    USAGE
+    my $price = digital_call($S, $K, $t, $r_q, $mu, $sigma)
+
+    PARAMS
+    $S => stock price
+    $K => barrier
+    $t => time (1 = 1 year)
+    $r_q => payout currency interest rate (0.05 = 5%)
+    $mu => quanto drift adjustment (0.05 = 5%)
+    $sigma => volatility (0.3 = 30%)
 
     DESCRIPTION
-    DIGITAL CALL
+    Price a Call and remove the N(d2) part if the time is too small
 
-    $S stock price
-    $K barrier
-    $t time (1 = 1 year)
-    $r_q payout currency interest rate (0.05 = 5%)
-    $mu quanto drift adjustment (0.05 = 5%)
-    $sigma volatility (0.3 = 30%)
+    EXPLANATION 
+    The definition of the contract is that if S > K, client wins
+    full payout (1).  However the formula DC(T,K) = e^(-rT) N(d2) will not be
+    correct when T->0 and K=S.  The value of DC(T,K) for this case will be 0.5. 
+    
+    The formula is actually "correct" because when T->0 and S=K, the probability
+    should just be 0.5 that the contract wins, moving up or down is equally
+    likely in that very small amount of time left. Thus the only problem is
+    that the math cannot evaluate at T=0, where divide by 0 error occurs. Thus,
+    we need this check that throws away the N(d2) part (N(d2) will evaluate
+    "wrongly" to 0.5 if S=K).
 
     NOTE
     Note that we have digital_call = - dCall/dStrike
@@ -108,71 +122,35 @@ sub Vanilla_put {
 
 =cut
 
-=head2 Call
-
-    USAGE
-    my $price = Call($S, $K, $t, $r_q, $mu, $sigma)
-
-    DESCRIPTION
-    Price a Call and remove the N(d2) part if the time is too small
-
-    EXPLANATION
-    The definition of our bet is that if S > K, client
-     wins full payout (1).
-     However the formula DC(T,K) = e^(-rT) N(d2) will not
-     be correct when T->0 and K=S. The value of DC(T,K)
-     for this case will be 0.5.
-     The formula is actually "correct" because when T->0
-     and S=K, the probability should just be 0.5 that the
-     bet wins, moving up or down is equally likely in that
-     very small amount of time left.
-     Thus the only problem is that the math cannot evaluate
-     at T=0, where divide by 0 error occurs.
-    Thus, we need this check that throws away the N(d2)
-    part (N(d2) will evaluate "wrongly" to 0.5 if S=K).
-
-=cut
-
-sub Call {
+sub digital_call {
     my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
 
     if ( $t < $SMALLTIME ) {
         return ( $S > $K ) ? exp( -$r_q * $t ) : 0;
     }
 
-    return exp( -$r_q * $t ) * pnorm( D2( $S, $K, $t, $r_q, $mu, $sigma ) );
+    return exp( -$r_q * $t ) * pnorm( d2( $S, $K, $t, $r_q, $mu, $sigma ) );
 }
 
-=head2 BEAR BET
-
-    DESCRIPTION
-     DIGITAL PUT
-     $S stock price
-     $K barrier
-     $t time (1 = 1 year)
-     $r_q payout currency interest rate (0.05 = 5%)
-     $mu quanto drift adjustment (0.05 = 5%)
-     $sigma volatility (0.3 = 30%)
-
-    NOTE
-     Note that we have digital_call = - dCall/dStrike
-     pair Foreign/Domestic
-
-    [3] for $r_q and $mu for quantos
-
-=cut
-
-=head2 Put
+=head2 digital_put
 
     USAGE
-    my $price = Put($S, $K, $t, $r_q, $mu, $sigma)
+    my $price = digital_put($S, $K, $t, $r_q, $mu, $sigma)
+
+    PARAMS
+    $S => stock price
+    $K => barrier
+    $t => time (1 = 1 year)
+    $r_q => payout currency interest rate (0.05 = 5%)
+    $mu => quanto drift adjustment (0.05 = 5%)
+    $sigma => volatility (0.3 = 30%)
 
     DESCRIPTION
     Price a standard Digital Put
 
 =cut
 
-sub Put {
+sub digital_put {
     my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
 
     if ( $t < $SMALLTIME ) {
@@ -180,112 +158,104 @@ sub Put {
     }
 
     return
-      exp( -$r_q * $t ) * pnorm( -1 * D2( $S, $K, $t, $r_q, $mu, $sigma ) );
+      exp( -$r_q * $t ) * pnorm( -1 * d2( $S, $K, $t, $r_q, $mu, $sigma ) );
 }
 
-=head2 D2
+=head2 d2
 
 returns the DS term common to many BlackScholes formulae.
 
 =cut
 
-sub D2 {
+sub d2 {
     my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
 
     return ( log( $S / $K ) + ( $mu - $sigma * $sigma / 2.0 ) * $t ) /
       ( $sigma * sqrt($t) );
 }
 
-=head2 EXPIRY UP OR DOWN (AKA EXPIRY MISS)
-
-    Description
-     $S stock price
-     $t time (1 = 1 year)
-     $U barrier
-     $D barrier
-     $r_q payout currency interest rate (0.05 = 5%)
-     $mu quanto drift adjustment (0.05 = 5%)
-     $sigma volatility (0.3 = 30%)
-
-    see [3] for $r_q and $mu for quantos
-
-=cut
-
-=head2 Expirymiss
+=head2 expiry_miss
 
     USAGE
-    my $price = Expirymiss($S, $U, $D, $t, $r_q, $mu, $sigma)
+    my $price = expiry_miss($S, $U, $D, $t, $r_q, $mu, $sigma)
+
+    PARAMS
+    $S => stock price
+    $t => time (1 = 1 year)
+    $U => barrier
+    $D => barrier
+    $r_q => payout currency interest rate (0.05 = 5%)
+    $mu => quanto drift adjustment (0.05 = 5%)
+    $sigma => volatility (0.3 = 30%)
 
     DESCRIPTION
     Price an expiry miss contract (1 Call + 1 Put)
-
-=cut
-
-sub Expirymiss {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma ) = @_;
-
-    my ($call_price) = Call( $S, $U, $t, $r_q, $mu, $sigma );
-    my ($put_price) = Put( $S, $D, $t, $r_q, $mu, $sigma );
-
-    return $call_price + $put_price;
-}
-
-=head2 EXPIRY RANGE
-
-    Description
-     $S stock price
-     $t time (1 = 1 year)
-     $U barrier
-     $D barrier
-     $r_q payout currency interest rate (0.05 = 5%)
-     $mu quanto drift adjustment (0.05 = 5%)
-     $sigma volatility (0.3 = 30%)
-
-     see [3] for $r_q and $mu for quantos
-
-=cut
-
-=head2 Expiryrange
-
-    USAGE
-    my $price = Expiryrange($S, $U, $D, $t, $r_q, $mu, $sigma)
-
-    DESCRIPTION
-    Price an Expiry Range contract as Foreign/Domestic.
-
-=cut
-
-sub Expiryrange {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma ) = @_;
-
-    return exp( -$r_q * $t ) - Expirymiss( $S, $U, $D, $t, $r_q, $mu, $sigma );
-}
-
-=head2 Onetouch
-
-    Description
-     $S stock price
-     $H barrier
-     $t time (1 = 1 year)
-     $r_q payout currency interest rate (0.05 = 5%)
-     $mu quanto drift adjustment (0.05 = 5%)
-     $sigma volatility (0.3 = 30%)
 
     [3] for $r_q and $mu for quantos
 
 =cut
 
-sub Onetouch {
+sub expiry_miss {
+    my ( $S, $U, $D, $t, $r_q, $mu, $sigma ) = @_;
+
+    my ($call_price) = digital_call( $S, $U, $t, $r_q, $mu, $sigma );
+    my ($put_price) = digital_put( $S, $D, $t, $r_q, $mu, $sigma );
+
+    return $call_price + $put_price;
+}
+
+=head2 expiry_range
+
+    USAGE
+    my $price = expiry_range($S, $U, $D, $t, $r_q, $mu, $sigma)
+
+    PARAMS
+    $S => stock price
+    $t => time (1 = 1 year)
+    $U => barrier
+    $D => barrier
+    $r_q => payout currency interest rate (0.05 = 5%)
+    $mu => quanto drift adjustment (0.05 = 5%)
+    $sigma => volatility (0.3 = 30%)
+
+    DESCRIPTION
+    Price an Expiry Range contract as Foreign/Domestic.
+
+    [3] for $r_q and $mu for quantos
+
+=cut
+
+sub expiry_range {
+    my ( $S, $U, $D, $t, $r_q, $mu, $sigma ) = @_;
+
+    return exp( -$r_q * $t ) - expiry_miss( $S, $U, $D, $t, $r_q, $mu, $sigma );
+}
+
+=head2 one_touch
+
+    PARAMS
+    $S => stock price
+    $H => barrier
+    $t => time (1 = 1 year)
+    $r_q => payout currency interest rate (0.05 = 5%)
+    $mu => quanto drift adjustment (0.05 = 5%)
+    $sigma => volatility (0.3 = 30%)
+
+    [3] for $r_q and $mu for quantos
+
+=cut
+
+sub one_touch {
     my ( $S, $U, $t, $r_q, $mu, $sigma, $w ) = @_;
 
     # w = 0, rebate paid at hit (good way to remember is that waiting 
     #   time to get paid = 0)
     # w = 1, rebate paid at end.
 
-    # When the contract already reached it expiry and not yet reach it settlement time,
-    # it is consider an unexpired contract but will come to here with t=0 and 
-    # it will caused the formula to die
-    # hence set it to the SMALLTIME whiich is 1 second
+    # When the contract already reached it expiry and not yet reach it
+    # settlement time, it is consider an unexpired contract but will come to
+    # here with t=0 and it will caused the formula to die hence set it to the
+    # SMALLTIME whiich is 1 second
     $t = max( $SMALLTIME, $t );
 
     $w ||= 0;
@@ -311,41 +281,37 @@ sub Onetouch {
     return exp( -$w * $r_q * $t ) * $price;
 }
 
-=head2 NO TOUCH
-
-    DESCRIPTION
-     $S stock price
-     $H barrier
-     $t time (1 = 1 year)
-     $r_q payout currency interest rate (0.05 = 5%)
-     $mu quanto drift adjustment (0.05 = 5%)
-     $sigma volatility (0.3 = 30%)
-
-     [3] for $r_q and $mu for quantos
-
-     Payoff with domestic currency
-     Identity:
-     price of NoTouch = exp(- r t) - price of OneTouch(rebate paid at end)
-
-=cut
-
-=head2 Notouch
+=head2 no_touch
 
     USAGE
-    my $price = Notouch($S, $U, $t, $r_q, $mu, $sigma, $w)
+    my $price = no_touch($S, $U, $t, $r_q, $mu, $sigma, $w)
+
+    PARAMS
+    $S => stock price
+    $H => barrier
+    $t => time (1 = 1 year)
+    $r_q => payout currency interest rate (0.05 = 5%)
+    $mu => quanto drift adjustment (0.05 = 5%)
+    $sigma => volatility (0.3 = 30%)
 
     DESCRIPTION
     Price a No touch contract.
 
+    Payoff with domestic currency
+    Identity:
+    price of no_touch = exp(- r t) - price of one_touch(rebate paid at end)
+
+    [3] for $r_q and $mu for quantos
+
 =cut
 
-sub Notouch {
+sub no_touch {
     my ( $S, $U, $t, $r_q, $mu, $sigma ) = @_;
 
     # No touch bet always pay out at end
     my $w = 1;
 
-    return exp( -$r_q * $t ) - Onetouch( $S, $U, $t, $r_q, $mu, $sigma, $w );
+    return exp( -$r_q * $t ) - one_touch( $S, $U, $t, $r_q, $mu, $sigma, $w );
 }
 
 my $MAX_ITERATIONS_UPORDOWN_PELSSER_1997 = 1000;
@@ -366,7 +332,7 @@ our $SMALL_VALUE_MU                     = 1e-10;
 #
 # This value is very important for knowing stability to
 # certain formulas used. e.g. Pelsser formula for UPORDOWN
-# and RANGE bets.
+# and RANGE contracts.
 #
 my $MACHINE_ACCURACY = machine_accuracy();
 
@@ -412,9 +378,12 @@ sub machine_accuracy {
     return $e;
 }
 
-=head2 UP OR DOWN
+=head2 up_or_down
 
-    DESCRIPTION
+    USAGE
+    my $price = up_or_down(($S, $U, $D, $t, $r_q, $mu, $sigma, $w))
+
+    PARAMS
     $S stock price
     $t time (1 = 1 year)
     $U barrier
@@ -425,19 +394,12 @@ sub machine_accuracy {
 
     see [3] for $r_q and $mu for quantos
 
-=cut
-
-=head2 Upordown
-
-    USAGE
-    my $price = Upordown(($S, $U, $D, $t, $r_q, $mu, $sigma, $w))
-
     DESCRIPTION
     Price an Up or Down contract
 
 =cut
 
-sub Upordown {
+sub up_or_down {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
 
     # When the contract already reached it's expiry and not yet reach it settlement time,
@@ -457,7 +419,7 @@ sub Upordown {
     }
 
 #
-# SANITY CHECKS FOR UPORDOWN
+# SANITY CHECKS
 #
 # For extreme cases, the price will be wrong due the values in the
 # infinite series getting too large or too small, which causes
@@ -476,8 +438,8 @@ sub Upordown {
 #   CONDITION 3:    UPORDOWN[U,D] > ONETOUCH[D]
 #   CONDITION 4:    ONETOUCH[U] + ONETOUCH[D] >= $MIN_ACCURACY_UPORDOWN_PELSSER_1997
 #
-    my $onetouch_up_prob   = Onetouch( $S, $U, $t, $r_q, $mu, $sigma, $w );
-    my $onetouch_down_prob = Onetouch( $S, $D, $t, $r_q, $mu, $sigma, $w );
+    my $onetouch_up_prob   = one_touch( $S, $U, $t, $r_q, $mu, $sigma, $w );
+    my $onetouch_down_prob = one_touch( $S, $D, $t, $r_q, $mu, $sigma, $w );
 
     my $upordown_prob;
 
@@ -505,8 +467,8 @@ sub Upordown {
 
         # THIS IS THE ONLY PLACE IT SHOULD BE!
         $upordown_prob =
-          Ot_up_ko_down_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) +
-          Ot_down_ko_up_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
+          ot_up_ko_down_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) +
+          ot_down_ko_up_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
     }
 
     # CONDITION 4:
@@ -546,20 +508,17 @@ sub Upordown {
     return $upordown_prob;
 }
 
-=head2 Common_function_pelsser_1997
+=head2 common_function_pelsser_1997
 
     USAGE
-    my $c = Common_function_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $eta)
+    my $c = common_function_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $eta)
 
     DESCRIPTION
     Return the common function from Pelsser's Paper (1997)
 
-    NOTES
-    See [6] for formula & explanation
-
 =cut
 
-sub Common_function_pelsser_1997 {
+sub common_function_pelsser_1997 {
 
     # h: normalized high barrier, log(U/L)
     # x: normalized spot, log(S/L)
@@ -589,12 +548,11 @@ sub Common_function_pelsser_1997 {
     my $series_part = 0;
     my $hyp_part    = 0;
 
-    # See [6] for detailed explanation on this
     # These constants will determine whether or not this bet can be
     # evaluated to a predefined accuracy. It is VERY IMPORTANT because
     # if these conditions are not met, the prices can be complete nonsense!!
     my $stability_constant =
-      Get_stability_constant_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma,
+      get_stability_constant_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma,
         $w, $eta, 1 );
 
     # The number of iterations is important when recommending the
@@ -603,7 +561,7 @@ sub Common_function_pelsser_1997 {
     # price will be wrong! We must know the rate of convergence of
     # the formula used.
     my $iterations_required =
-      Get_min_iterations_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
+      get_min_iterations_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
 
     for ( my $k = 1 ; $k < $iterations_required ; $k++ ) {
         my $lambda_k_dash = (
@@ -668,20 +626,17 @@ sub Common_function_pelsser_1997 {
     return ( $hyp_part - $series_part ) * exp( -$r_q * $t * $w );
 }
 
-=head2 Get_stability_constant_pelsser_1997
+=head2 get_stability_constant_pelsser_1997
 
     USAGE
-    my $constant = Get_stability_constant_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $eta, $p)
+    my $constant = get_stability_constant_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $eta, $p)
 
     DESCRIPTION
     Get the stability constant (Pelsser 1997)
 
-    NOTES
-    See [6] for formula & explanation
-
 =cut
 
-sub Get_stability_constant_pelsser_1997 {
+sub get_stability_constant_pelsser_1997 {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, $eta, $p ) = @_;
 
     # $eta = 1, onetouch up knockout down
@@ -721,21 +676,19 @@ sub Get_stability_constant_pelsser_1997 {
     return $stability_condition;
 }
 
-=head2 Ot_up_ko_down_pelsser_1997
+=head2 ot_up_ko_down_pelsser_1997
 
     USAGE
-    my $price = Ot_up_ko_down_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w)
+    my $price = ot_up_ko_down_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w)
 
     DESCRIPTION
     This is V_{RAHU} in paper [5], or ONETOUCH-UP-KNOCKOUT-DOWN,
-    a bet that wins if it touches upper barrier, but expires
+    a contract that wins if it touches upper barrier, but expires
     worthless if it touches the lower barrier first.
-
-    See [6] for formula & explanation.
 
 =cut
 
-sub Ot_up_ko_down_pelsser_1997 {
+sub ot_up_ko_down_pelsser_1997 {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
 
     my $mu_new = $mu - ( 0.5 * $sigma * $sigma );
@@ -744,24 +697,22 @@ sub Ot_up_ko_down_pelsser_1997 {
 
     return
       exp( $mu_new * ( $h - $x ) / ( $sigma * $sigma ) ) *
-      Common_function_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, 1 );
+      common_function_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, 1 );
 }
 
-=head2 Ot_down_ko_up_pelsser_1997
+=head2 ot_down_ko_up_pelsser_1997
 
     USAGE
-    my $price = Ot_down_ko_up_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w)
+    my $price = ot_down_ko_up_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w)
 
     DESCRIPTION
     This is V_{RAHL} in paper [5], or ONETOUCH-DOWN-KNOCKOUT-UP,
-    a bet that wins if it touches lower barrier, but expires
+    a contract that wins if it touches lower barrier, but expires
     worthless if it touches the upper barrier first.
-
-    See [6] for formula & explanation
 
 =cut
 
-sub Ot_down_ko_up_pelsser_1997 {
+sub ot_down_ko_up_pelsser_1997 {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
 
     my $mu_new = $mu - ( 0.5 * $sigma * $sigma );
@@ -770,23 +721,21 @@ sub Ot_down_ko_up_pelsser_1997 {
 
     return
       exp( -$mu_new * $x / ( $sigma * $sigma ) ) *
-      Common_function_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, 0 );
+      common_function_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, 0 );
 }
 
-=head2 Get_min_iterations_pelsser_1997
+=head2 get_min_iterations_pelsser_1997
 
     USAGE
-    my $min = Get_min_iterations_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy)
+    my $min = get_min_iterations_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy)
 
     DESCRIPTION
     An estimate of the number of iterations required to achieve a certain
     level of accuracy in the price.
 
-    See [6] for formula & explanation
-
 =cut
 
-sub Get_min_iterations_pelsser_1997 {
+sub get_min_iterations_pelsser_1997 {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy ) = @_;
 
     if ( not defined $accuracy ) {
@@ -823,8 +772,6 @@ sub Get_min_iterations_pelsser_1997 {
     DESCRIPTION
     An estimate of the number of iterations required to achieve a certain
     level of accuracy in the price for ONETOUCH-UP-KNOCKOUT-DOWN.
-
-    See [6] for formula & explanation
 
 =cut
 
@@ -890,8 +837,6 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
     An estimate of the number of iterations required to achieve a certain
     level of accuracy in the price for ONETOUCH-UP-KNOCKOUT-UP.
 
-    See [6] for formula & explanation
-
 =cut
 
 sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
@@ -907,9 +852,12 @@ sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
         $mu, $sigma, $w, $accuracy );
 }
 
-=head2 BARRIER RANGE
+=head2 range
 
-    DESCRIPTION
+    USAGE
+    my $price = range($S, $U, $D, $t, $r_q, $mu, $sigma, $w)
+
+    PARAMS
     $S stock price
     $t time (1 = 1 year)
     $U barrier
@@ -920,33 +868,26 @@ sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
 
     see [3] for $r_q and $mu for quantos
 
-=cut
-
-=head2 Range
-
-    USAGE
-    my $price = Range($S, $U, $D, $t, $r_q, $mu, $sigma, $w)
-
     DESCRIPTION
     Price a range contract.
 
 =cut
 
-sub Range {
+sub range {
 
     # payout time $w is only a dummy. range bets always payout at end.
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
 
-    # Range always pay out at end
+    # range always pay out at end
     $w = 1;
 
     return
-      exp( -$r_q * $t ) - Upordown( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
+      exp( -$r_q * $t ) - up_or_down( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
 }
 
 =head1 REFERENCES
 
-[1] P.G Zhang [1997], "Exotic Options", World Scientific [Book is available in our office]
+[1] P.G Zhang [1997], "Exotic Options", World Scientific
     Another good refernce is Mark rubinstein, Eric Reiner [1991], "Binary Options", RISK 4, pp 75-83
 
 [2] Anlong Li [1999], "The pricing of double barrier options and their variations".
@@ -954,12 +895,7 @@ sub Range {
 
 [3] Uwe Wystup. FX Options and  Strutured Products. Wiley Finance, England, 2006. pp 93-96 (Quantos)
 
-[4] Our own Formula file RMGFormula.pdf in the /documents folder of the 'quant' SVN module.
-    Currently, all the formula in our code can be found in that file, in which we also list all references we quoted.
-
-[5] Antoon Pelsser, "Pricing Double Barrier Options: An Analytical Approach", Jan 15 1997.
-
-[6] quant/Documents/Pricing/Upordown.tex in the SVN quants module.
+[4] Antoon Pelsser, "Pricing Double Barrier Options: An Analytical Approach", Jan 15 1997.
 
 =head1 SYNOPSIS
 
@@ -978,12 +914,12 @@ binary.com, C<< <rohan at binary.com> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-math-business-blackscholes-binaries at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Math-Business-BlackScholes-Binaries>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
+Please report any bugs or feature requests to
+C<bug-math-business-blackscholes-binaries at rt.cpan.org>, or through the web
+interface at
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Math-Business-BlackScholes-Binaries>.
+I will be notified, and then you'll automatically be notified of progress on
+your bug as I make changes.
 
 =head1 SUPPORT
 
