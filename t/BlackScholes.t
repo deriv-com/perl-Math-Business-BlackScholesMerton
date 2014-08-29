@@ -88,13 +88,13 @@ my @test_cases = (
         domestic => 0.3739,
     },
     {
-        type     => 'expiry_range',
+        type     => 'ends_between',
         barriers => [ 1.36, 1.34 ],
         foreign  => 0.3732,
         domestic => 0.3732,
     },
     {
-        type     => 'expiry_miss',
+        type     => 'ends_outside',
         barriers => [ 1.36, 1.34 ],
         foreign  => 0.6268,
         domestic => 0.6268,

@@ -174,10 +174,10 @@ sub d2 {
       ( $sigma * sqrt($t) );
 }
 
-=head2 expiry_miss
+=head2 ends_outside
 
     USAGE
-    my $price = expiry_miss($S, $U, $D, $t, $r_q, $mu, $sigma)
+    my $price = ends_outside($S, $U, $D, $t, $r_q, $mu, $sigma)
 
     PARAMS
     $S => stock price
@@ -195,7 +195,7 @@ sub d2 {
 
 =cut
 
-sub expiry_miss {
+sub ends_outside {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma ) = @_;
 
     my ($call_price) = digital_call( $S, $U, $t, $r_q, $mu, $sigma );
@@ -204,10 +204,10 @@ sub expiry_miss {
     return $call_price + $put_price;
 }
 
-=head2 expiry_range
+=head2 ends_between
 
     USAGE
-    my $price = expiry_range($S, $U, $D, $t, $r_q, $mu, $sigma)
+    my $price = ends_between($S, $U, $D, $t, $r_q, $mu, $sigma)
 
     PARAMS
     $S => stock price
@@ -225,10 +225,10 @@ sub expiry_miss {
 
 =cut
 
-sub expiry_range {
+sub ends_between {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma ) = @_;
 
-    return exp( -$r_q * $t ) - expiry_miss( $S, $U, $D, $t, $r_q, $mu, $sigma );
+    return exp( -$r_q * $t ) - ends_outside( $S, $U, $D, $t, $r_q, $mu, $sigma );
 }
 
 =head2 one_touch
