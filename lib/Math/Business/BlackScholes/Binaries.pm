@@ -18,6 +18,20 @@ Math::Business::BlackScholes::Binaries
 
 Version 1.00
 
+=head1 SYNOPSIS
+
+    use Math::Business::BlackScholes::Binaries;
+
+    # price of a Call option
+    my $price_call_option = Math::Business::BlackScholes::Binaries::digital_call(
+        1.35,       # stock price
+        1.36,       # barrier
+        (7/365),    # time
+        0.002,      # payout currency interest rate (0.05 = 5%)
+        0.001,      # quanto drift adjustment (0.05 = 5%)
+        0.11,       # volatility (0.3 = 30%)
+    );
+
 =head1 DESCRIPTION
 
 Prices options using the GBM model, all closed formulas.
@@ -255,7 +269,7 @@ sub one_touch {
     # When the contract already reached it expiry and not yet reach it
     # settlement time, it is consider an unexpired contract but will come to
     # here with t=0 and it will caused the formula to die hence set it to the
-    # SMALLTIME whiich is 1 second
+    # SMALLTIME which is 1 second
     $t = max( $SMALLTIME, $t );
 
     $w ||= 0;
@@ -308,7 +322,7 @@ sub one_touch {
 sub no_touch {
     my ( $S, $U, $t, $r_q, $mu, $sigma ) = @_;
 
-    # No touch bet always pay out at end
+    # No touch contract always pay out at end
     my $w = 1;
 
     return exp( -$r_q * $t ) - one_touch( $S, $U, $t, $r_q, $mu, $sigma, $w );
@@ -371,7 +385,10 @@ sub machine_accuracy {
     # If accuracy is very bad, we return the minimum accuracy for a 32-bit double
     if ( $e > $ma_32bit_23mantissa ) {
         warn
-"Machine accuracy ($e greater than $ma_32bit_23mantissa) seems worse than the primitive 32-bit double representation. Setting to minimum accuracy of $ma_32bit_23mantissa. This is NOT GOOD because it means that there are some bets than we can't price on this machine, that we otherwise can on a higher precision machine. Please UPGRADE THIS MACHINE!!";
+"Machine accuracy ($e greater than $ma_32bit_23mantissa) seems worse than the
+primitive 32-bit double representation. Setting to minimum accuracy of
+$ma_32bit_23mantissa. This is NOT GOOD because it means that there are some
+contracts than we can't price on this machine, that we otherwise can on a higher precision machine. Please UPGRADE THIS MACHINE!!";
         return $ma_32bit_23mantissa;
     }
 
@@ -425,11 +442,15 @@ sub up_or_down {
 # infinite series getting too large or too small, which causes
 # roundoff errors in the computer. Thus no matter how many iterations
 # you make, the errors will never go away.
+#
 # For example try this:
 #
-#   my ($S, $U, $D, $t, $r, $q, $vol, $w) = (100.00, 118.97, 99.00, 30/365, 0.1, 0.02, 0.01, 1);
-#   $up_price      = BOM::Utility::Math::BlackScholes::Ot_up_ko_down_pelsser_1997($S,$U,$D,$t,$r,$q,$vol,$w);
-#   $down_price    = BOM::Utility::Math::BlackScholes::Ot_down_ko_up_pelsser_1997($S,$U,$D,$t,$r,$q,$vol,$w);
+#   my ($S, $U, $D, $t, $r, $q, $vol, $w) 
+#       = (100.00, 118.97, 99.00, 30/365, 0.1, 0.02, 0.01, 1);
+#   $up_price = Math::Business::BlackScholes::Binaries::ot_up_ko_down_pelsser_1997(
+#       $S,$U,$D,$t,$r,$q,$vol,$w);
+#   $down_price= Math::Business::BlackScholes::Binaries::ot_down_ko_up_pelsser_1997(
+#       $S,$U,$D,$t,$r,$q,$vol,$w);
 #
 # Thus we put a sanity checks here such that
 #
@@ -472,7 +493,7 @@ sub up_or_down {
     }
 
     # CONDITION 4:
-    #   Now check on the other end, when the bet is too close to payout.
+    #   Now check on the other end, when the contract is too close to payout.
     #   Not really needed to check for payout at hit, because RANGE is
     #   always at end, and thus the value (DISCOUNT - UPORDOWN) is not
     #   evaluated.
@@ -548,7 +569,7 @@ sub common_function_pelsser_1997 {
     my $series_part = 0;
     my $hyp_part    = 0;
 
-    # These constants will determine whether or not this bet can be
+    # These constants will determine whether or not this contract can be
     # evaluated to a predefined accuracy. It is VERY IMPORTANT because
     # if these conditions are not met, the prices can be complete nonsense!!
     my $stability_constant =
@@ -875,7 +896,7 @@ sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
 
 sub range {
 
-    # payout time $w is only a dummy. range bets always payout at end.
+    # payout time $w is only a dummy. range contracts always payout at end.
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
 
     # range always pay out at end
@@ -896,17 +917,7 @@ sub range {
 [3] Uwe Wystup. FX Options and  Strutured Products. Wiley Finance, England, 2006. pp 93-96 (Quantos)
 
 [4] Antoon Pelsser, "Pricing Double Barrier Options: An Analytical Approach", Jan 15 1997.
-
-=head1 SYNOPSIS
-
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
-    use Math::Business::BlackScholes::Binaries;
-
-    my $foo = Math::Business::BlackScholes::Binaries->new();
-    ...
+    http://repub.eur.nl/pub/7807/1997-0152.pdf
 
 =head1 AUTHOR
 
