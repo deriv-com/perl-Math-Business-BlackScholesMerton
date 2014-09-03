@@ -36,7 +36,7 @@ Version 1.00
 
 Prices options using the GBM model, all closed formulas.
 
-Important(a): Basically, one_touch, up_or_down and double_touch have two cases of 
+Important(a): Basically, one_touch, double_one_touch and double_touch have two cases of 
 payoff either at end or at hit. We treat them differently. We use parameter 
 $w to differ them.
 
@@ -225,9 +225,9 @@ sub ends_outside {
 
     PARAMS
     $S => stock price
-    $t => time (1 = 1 year)
     $U => barrier
     $D => barrier
+    $t => time (1 = 1 year)
     $r_q => payout currency interest rate (0.05 = 5%)
     $mu => quanto drift adjustment (0.05 = 5%)
     $sigma => volatility (0.3 = 30%)
@@ -395,10 +395,10 @@ contracts than we can't price on this machine, that we otherwise can on a higher
     return $e;
 }
 
-=head2 up_or_down
+=head2 double_one_touch
 
     USAGE
-    my $price = up_or_down(($S, $U, $D, $t, $r_q, $mu, $sigma, $w))
+    my $price = double_one_touch(($S, $U, $D, $t, $r_q, $mu, $sigma, $w))
 
     PARAMS
     $S stock price
@@ -416,7 +416,7 @@ contracts than we can't price on this machine, that we otherwise can on a higher
 
 =cut
 
-sub up_or_down {
+sub double_one_touch {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
 
     # When the contract already reached it's expiry and not yet reach it settlement time,
@@ -873,10 +873,10 @@ sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
         $mu, $sigma, $w, $accuracy );
 }
 
-=head2 range
+=head2 double_no_touch
 
     USAGE
-    my $price = range($S, $U, $D, $t, $r_q, $mu, $sigma, $w)
+    my $price = double_no_touch($S, $U, $D, $t, $r_q, $mu, $sigma, $w)
 
     PARAMS
     $S stock price
@@ -890,20 +890,20 @@ sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
     see [3] for $r_q and $mu for quantos
 
     DESCRIPTION
-    Price a range contract.
+    Price a double_no_touch contract.
 
 =cut
 
-sub range {
+sub double_no_touch {
 
-    # payout time $w is only a dummy. range contracts always payout at end.
+    # payout time $w is only a dummy. double_no_touch contracts always payout at end.
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
 
-    # range always pay out at end
+    # double_no_touch always pay out at end
     $w = 1;
 
     return
-      exp( -$r_q * $t ) - up_or_down( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
+      exp( -$r_q * $t ) - double_one_touch( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
 }
 
 =head1 REFERENCES
