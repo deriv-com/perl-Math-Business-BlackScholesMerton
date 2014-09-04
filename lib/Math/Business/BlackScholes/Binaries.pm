@@ -402,9 +402,9 @@ contracts than we can't price on this machine, that we otherwise can on a higher
 
     PARAMS
     $S stock price
-    $t time (1 = 1 year)
     $U barrier
     $D barrier
+    $t time (1 = 1 year)
     $r_q payout currency interest rate (0.05 = 5%)
     $mu quanto drift adjustment (0.05 = 5%)
     $sigma volatility (0.3 = 30%)
