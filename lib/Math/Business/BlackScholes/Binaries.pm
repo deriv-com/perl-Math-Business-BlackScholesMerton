@@ -249,7 +249,7 @@ sub ends_between {
 
     PARAMS
     $S => stock price
-    $H => barrier
+    $U => barrier
     $t => time (1 = 1 year)
     $r_q => payout currency interest rate (0.05 = 5%)
     $mu => quanto drift adjustment (0.05 = 5%)
@@ -302,7 +302,7 @@ sub one_touch {
 
     PARAMS
     $S => stock price
-    $H => barrier
+    $U => barrier
     $t => time (1 = 1 year)
     $r_q => payout currency interest rate (0.05 = 5%)
     $mu => quanto drift adjustment (0.05 = 5%)
@@ -352,7 +352,8 @@ my $MACHINE_ACCURACY = machine_accuracy();
 
 =head2 machine_accuracy
 
-    determine the floating point accuracy of this machine for the numerical approximations
+    determine the floating point accuracy of this machine for the 
+    numerical approximations
 
 =cut
 
@@ -419,10 +420,10 @@ contracts than we can't price on this machine, that we otherwise can on a higher
 sub double_one_touch {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
 
-    # When the contract already reached it's expiry and not yet reach it settlement time,
-    # it is considered an unexpired contract but will come to here with t=0 and 
-    # it will caused the formula to die
-    # hence set it to the SMALLTIME whiich is 1 second
+    # When the contract already reached it's expiry and not yet reach it
+    # settlement time, it is considered an unexpired contract but will come to
+    # here with t=0 and it will caused the formula to die hence set it to the
+    # SMALLTIME whiich is 1 second
     $t = max( $t, $SMALLTIME );
 
     # $w = 0, paid at hit

@@ -4,6 +4,7 @@ use lib 'lib';
 use Test::More tests => 25;
 use Test::NoWarnings;
 use Math::Business::BlackScholes::Binaries;
+use Data::Dumper;
 
 {
 
@@ -140,6 +141,7 @@ foreach my $test_case (@test_cases) {
         ),
     );
 
+    die Dumper \%probs;
     foreach my $curr ( sort keys %probs ) {
         my $length = length( $test_case->{$curr} );
         my $precision = ( $length < 2 ) ? 1 : 10**( -1 * ( $length - 2 ) );
