@@ -141,7 +141,6 @@ foreach my $test_case (@test_cases) {
         ),
     );
 
-    die Dumper \%probs;
     foreach my $curr ( sort keys %probs ) {
         my $length = length( $test_case->{$curr} );
         my $precision = ( $length < 2 ) ? 1 : 10**( -1 * ( $length - 2 ) );
