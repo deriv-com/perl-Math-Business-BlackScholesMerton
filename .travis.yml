@@ -8,5 +8,7 @@ before_install:
     # install prereqs
     - "cpanm Math::CDF"
     - "cpanm Devel::Cover::Report::Coveralls"
+    - "cpanm Test::Most"
+    - "cpanm Test::Exception"
 script:
     perl Makefile.PL && make test && cover -test -report coveralls

@@ -523,8 +523,11 @@ sub double_one_touch {
         or not( $upordown_prob + $SMALL_TOLERANCE > $onetouch_down_prob )
       )
     {
-        die
-"UPORDOWN price sanity checks failed for S=$S, U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w. UPORDOWN PROB=$upordown_prob , ONETOUCH_UP PROB=$onetouch_up_prob , ONETOUCH_DOWN PROB=$onetouch_down_prob";
+        die "UPORDOWN price sanity checks failed for S=$S, U=$U, "
+          . "D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w. "
+          . "UPORDOWN PROB=$upordown_prob , "
+          . "ONETOUCH_UP PROB=$onetouch_up_prob , "
+          . "ONETOUCH_DOWN PROB=$onetouch_down_prob";
     }
 
     return $upordown_prob;
@@ -555,8 +558,8 @@ sub common_function_pelsser_1997 {
     # $eta = 0, onetouch down knockout up
     # This variable used to check stability
     if ( not defined $eta ) {
-        die
-"Wrong usage of this function for S=$S, U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, eta not defined.";
+        die "Wrong usage of this function for S=$S, U=$U, D=$D, "
+          . "t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, eta not defined.";
     }
     if ( $eta == 0 ) { $x = $h - $x; }
 
@@ -610,7 +613,12 @@ sub common_function_pelsser_1997 {
         #
         if ( $k == 1 and ( not( abs($phi) < $stability_constant ) ) ) {
             die
-"PELSSER VALUATION formula for S=$S, U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, vol=$sigma, w=$w, eta=$eta, cannot be evaluated because PELSSER VALUATION stability conditions ($phi less than $stability_constant) not met. This could be due to barriers too big, volatilities too low, interest/dividend rates too high, or machine accuracy too low. Machine accuracy is "
+              "PELSSER VALUATION formula for S=$S, U=$U, D=$D, t=$t, r_q=$r_q, "
+              . "mu=$mu, vol=$sigma, w=$w, eta=$eta, cannot be evaluated because"
+              . "PELSSER VALUATION stability conditions ($phi less than "
+              . "$stability_constant) not met. This could be due to barriers "
+              . "too big, volatilities too low, interest/dividend rates too high, "
+              . "or machine accuracy too low. Machine accuracy is "
               . $MACHINE_ACCURACY . ".";
         }
     }
@@ -665,8 +673,8 @@ sub get_stability_constant_pelsser_1997 {
     # $eta = 0, onetouch down knockout up
 
     if ( not defined $eta ) {
-        die
-"Wrong usage of this function for S=$S, U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, Eta not defined.";
+        die "Wrong usage of this function for S=$S, U=$U, D=$D, t=$t, "
+          . "r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, Eta not defined.";
     }
 
     # p is the power of pi
@@ -674,8 +682,9 @@ sub get_stability_constant_pelsser_1997 {
     # p=2 for delta
     # p=3 for gamma
     if ( $p != 1 and $p != 2 and $p != 3 ) {
-        die
-"Wrong usage of this function for S=$S, U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, Power of PI must be 1, 2 or 3. Given $p.";
+        die "Wrong usage of this function for S=$S, U=$U, D=$D, t=$t, "
+          . "r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, Power of PI must "
+          . "be 1, 2 or 3. Given $p.";
     }
 
     my $h       = log( $U / $D );
@@ -823,8 +832,11 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
 
     # This can happen when stability condition fails
     if ( $delta * $B <= 0 ) {
-        die
-"(_get_min_iterations_ot_up_ko_down_pelsser_1997) Cannot evaluate minimum iterations because too many iterations required!! delta=$delta, B=$B for input parameters S=$S, U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, accuracy=$accuracy";
+        die "(_get_min_iterations_ot_up_ko_down_pelsser_1997) Cannot "
+          . "evaluate minimum iterations because too many iterations "
+          . "required!! delta=$delta, B=$B for input parameters S=$S, "
+          . "U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, "
+          . "accuracy=$accuracy";
         return $MAX_ITERATIONS_UPORDOWN_PELSSER_1997;
     }
 
