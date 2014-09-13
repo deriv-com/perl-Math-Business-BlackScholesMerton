@@ -800,6 +800,10 @@ sub get_min_iterations_pelsser_1997 {
 sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy ) = @_;
 
+    if (!defined $accuracy) {
+        die "accuracy required";
+    }
+
     my $pi = Math::Trig::pi;
 
     my $h       = log( $U / $D );
@@ -819,8 +823,8 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
 
     # This can happen when stability condition fails
     if ( $delta * $B <= 0 ) {
-        warn
-"(_get_min_iterations_up_first_pelsser_1997) Cannot evaluate minimum iterations because too many iterations required!! delta=$delta, B=$B for input parameters S=$S, U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, accuracy=$accuracy";
+        die
+"(_get_min_iterations_ot_up_ko_down_pelsser_1997) Cannot evaluate minimum iterations because too many iterations required!! delta=$delta, B=$B for input parameters S=$S, U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, accuracy=$accuracy";
         return $MAX_ITERATIONS_UPORDOWN_PELSSER_1997;
     }
 
