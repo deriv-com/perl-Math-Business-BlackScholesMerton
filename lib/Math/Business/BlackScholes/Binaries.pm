@@ -515,7 +515,7 @@ sub double_one_touch {
 #   We use hardcoded small value of $SMALL_TOLERANCE, because if we were to increase
 #   the minimum accuracy, and this small value uses that min accuracy, it is
 #   very hard for the conditions to pass.
-    my $SMALL_TOLERANCE = 0.00001;
+    my $SMALL_TOLERANCE = 10000000;
     if (
         not( $upordown_prob <
             $onetouch_up_prob + $onetouch_down_prob + $SMALL_TOLERANCE )
@@ -839,12 +839,10 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
 
     if ( $k_min < $MIN_ITERATIONS_UPORDOWN_PELSSER_1997 ) {
 
-        # print "$0: $k_min less than $MIN_ITERATIONS_UPORDOWN_PELSSER_1997";
         return $MIN_ITERATIONS_UPORDOWN_PELSSER_1997;
     }
     elsif ( $k_min > $MAX_ITERATIONS_UPORDOWN_PELSSER_1997 ) {
 
-        # print "$0: $k_min greater than $MAX_ITERATIONS_UPORDOWN_PELSSER_1997";
         return $MAX_ITERATIONS_UPORDOWN_PELSSER_1997;
     }
 
