@@ -3,5 +3,14 @@ Makefile.PL
 MANIFEST			This list of files
 README.md
 t/00-load.t
+t/barrier_infinity.t
+t/barrier_zero.t
 t/BlackScholes.t
+t/get_min_iterations_pelsser.t
+t/get_stability_constant_pelsser_1997.t
+t/lib
+t/lib/Roundnear.pm
+t/min_accuracy_pelsser.t
+t/smalltime.t
+t/small_value_mu.t
 t/sum_to_one.t
