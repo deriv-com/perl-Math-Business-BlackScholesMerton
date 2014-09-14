@@ -328,8 +328,8 @@ sub no_touch {
     return exp( -$r_q * $t ) - one_touch( $S, $U, $t, $r_q, $mu, $sigma, $w );
 }
 
-my $MAX_ITERATIONS_UPORDOWN_PELSSER_1997 = 1000;
-my $MIN_ITERATIONS_UPORDOWN_PELSSER_1997 = 16;
+our $MAX_ITERATIONS_UPORDOWN_PELSSER_1997 = 1000;
+our $MIN_ITERATIONS_UPORDOWN_PELSSER_1997 = 16;
 
 #
 # This variable requires 'our' only because it needs to be
