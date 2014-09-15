@@ -9,6 +9,7 @@ my $SMALLTIME = 1 / ( 60 * 60 * 24 * 365 );    # 1 second in years;
 use List::Util qw(max);
 use Math::CDF qw(pnorm);
 use Math::Trig;
+use Machine::Epsilon;
 
 =head1 NAME
 
@@ -348,53 +349,7 @@ our $SMALL_VALUE_MU                     = 1e-10;
 # certain formulas used. e.g. Pelsser formula for UPORDOWN
 # and RANGE contracts.
 #
-my $MACHINE_ACCURACY = machine_accuracy();
-
-=head2 machine_accuracy
-
-    determine the floating point accuracy of this machine for the 
-    numerical approximations
-
-=cut
-
-sub machine_accuracy {
-
-    # Machine accuracy for 32-bit floating point number
-    my $ma_32bit_23mantissa = 1.0 / ( 2**23 );
-
-    # Machine accuracy for 64-bit floating point number
-    my $ma_64bit_52mantissa = 1.0 / ( 2**52 );
-
-    # Machine accuracy for 128-bit floating point number (e.g. IBM AIX)
-    my $ma_128bit_105mantissa = 1.0 / ( 2**105 );
-
-    # Always start with a power of 2 to avoid roundoff errors!!
-    my $e = 1.0;
-    while (1) {
-        if ( 1.0 + $e / 2 == 1.0 ) { last; }
-        $e = $e / 2.0;
-
-        # Accuracy already better than a 128-bit machine!!
-        if ( $e < $ma_128bit_105mantissa ) {
-            warn
-"Machine accuracy seems too good to be true!! Do we have such a powerful machine? Assuming that something isn't right, and returning machine accuracy for 64 bit double.";
-            $e = $ma_64bit_52mantissa;
-            last;
-        }
-    }
-
-    # If accuracy is very bad, we return the minimum accuracy for a 32-bit double
-    if ( $e > $ma_32bit_23mantissa ) {
-        warn
-"Machine accuracy ($e greater than $ma_32bit_23mantissa) seems worse than the
-primitive 32-bit double representation. Setting to minimum accuracy of
-$ma_32bit_23mantissa. This is NOT GOOD because it means that there are some
-contracts than we can't price on this machine, that we otherwise can on a higher precision machine. Please UPGRADE THIS MACHINE!!";
-        return $ma_32bit_23mantissa;
-    }
-
-    return $e;
-}
+my $MACHINE_EPSILON = machine_epsilon();
 
 =head2 double_one_touch
 
@@ -619,7 +574,7 @@ sub common_function_pelsser_1997 {
               . "$stability_constant) not met. This could be due to barriers "
               . "too big, volatilities too low, interest/dividend rates too high, "
               . "or machine accuracy too low. Machine accuracy is "
-              . $MACHINE_ACCURACY . ".";
+              . $MACHINE_EPSILON . ".";
         }
     }
 
@@ -700,7 +655,7 @@ sub get_stability_constant_pelsser_1997 {
       ( max( $mu_new * ( ( $eta * $h ) - $x ), 0.0 ) *
           Math::Trig::pi /
           ( $sigma**2 ) );
-    $denominator *= ( Math::Trig::pi**( $p - 1 ) ) * $MACHINE_ACCURACY;
+    $denominator *= ( Math::Trig::pi**( $p - 1 ) ) * $MACHINE_EPSILON;
 
     my $stability_condition = $numerator / $denominator;
 
@@ -921,6 +876,12 @@ sub double_no_touch {
       exp( -$r_q * $t ) - double_one_touch( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
 }
 
+
+=head1 DEPENDENCIES
+
+    * Math::CDF
+    * Machine::Epsilon
+
 =head1 REFERENCES
 
 [1] P.G Zhang [1997], "Exotic Options", World Scientific
@@ -975,11 +936,6 @@ L<http://cpanratings.perl.org/d/Math-Business-BlackScholes-Binaries>
 L<http://search.cpan.org/dist/Math-Business-BlackScholes-Binaries/>
 
 =back
-
-
-=head1 DEPENDENCIES
-
-Math::CDF
 
 
 =head1 LICENSE AND COPYRIGHT

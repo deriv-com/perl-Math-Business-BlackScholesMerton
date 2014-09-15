@@ -9,6 +9,7 @@ before_install:
     - "cpanm Test::Most"
     - "cpanm Test::Exception"
     - "cpanm Math::CDF"
+    - "cpanm Machine::Epsilon"
     - "cpanm Devel::Cover::Report::Coveralls"
 script:
     perl Makefile.PL && make test && cover -test -report coveralls

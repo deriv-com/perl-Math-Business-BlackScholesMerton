@@ -21,6 +21,7 @@ WriteMakefile(
     },
     PREREQ_PM => {
         'Math::CDF' => 0,
+        'Machine::Epsilon' => 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Math-Business-BlackScholes-Binaries-*' },
