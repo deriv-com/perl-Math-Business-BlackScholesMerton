@@ -1,4 +1,4 @@
-Math-Business-BlackScholes-Binaries
+Math::Business::BlackScholes::Binaries [![Build Status](https://travis-ci.org/binary-com/perl-math-business-blackscholes-binaries.svg?branch=master)](https://travis-ci.org/binary-com/perl-math-business-blackscholes-binaries) [![Coverage Status](https://coveralls.io/repos/binary-com/perl-math-business-blackscholes-binaries/badge.png?branch=master)](https://coveralls.io/r/binary-com/perl-math-business-blackscholes-binaries?branch=master)
 
 Prices options using the GBM model, all closed formulas.
 
