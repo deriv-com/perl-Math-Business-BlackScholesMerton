@@ -46,7 +46,7 @@ $w = 1: payoff at end.
 
 Our current contracts pay rebate at hit time, so we set $w = 0 by default.
 
-Important(b) :Furthermore, for all our contracts, we allow a different 
+Important(b) :Furthermore, for all contracts, we allow a different 
 payout currency (Quantos).
 
 Paying domestic currency (JPY if for USDJPY) = correlation coefficient is ZERO.
@@ -118,7 +118,7 @@ sub vanilla_put {
     Price a Call and remove the N(d2) part if the time is too small
 
     EXPLANATION 
-    The definition of the contract is that if S > K, client wins
+    The definition of the contract is that if S > K, it gives 
     full payout (1).  However the formula DC(T,K) = e^(-rT) N(d2) will not be
     correct when T->0 and K=S.  The value of DC(T,K) for this case will be 0.5. 
     
@@ -329,6 +329,8 @@ sub no_touch {
     return exp( -$r_q * $t ) - one_touch( $S, $U, $t, $r_q, $mu, $sigma, $w );
 }
 
+# These variables require 'our' only because they need to be
+# accessed by a test script.
 our $MAX_ITERATIONS_UPORDOWN_PELSSER_1997 = 1000;
 our $MIN_ITERATIONS_UPORDOWN_PELSSER_1997 = 16;
 
@@ -797,13 +799,6 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
 
     # Check that condition is satisfied
     my $condition = max( exp( -$A * $t ) / ( $B * $delta ), 1 );
-
-#
-# This is the formula given by Pelsser paper, which is not as good
-# as our own derived formula, and will miserably fail the test:
-# /> su nobody -c 'prove -v /home/website/cgi/oop/Pricing/Engines/t/price_engine_black_scholes.t'
-#
-# $condition = max( exp(-$A * $t) / ($delta), 1 );
 
     my $k_min = log($condition) / ( $B * $t );
     $k_min = sqrt($k_min);
