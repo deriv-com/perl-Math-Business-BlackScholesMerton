@@ -14,56 +14,56 @@ my $q     = 0.001;
 my $barrier_h = exp(6);
 my $barrier_l = 1.34;
 
-# digital_call
-my $price_digital_call = Math::Business::BlackScholes::Binaries::digital_call(
+# digitalcall
+my $price_digitalcall = Math::Business::BlackScholes::Binaries::digitalcall(
     $S, $barrier_h, 7/365, 0.002, 0.001, 0.11
 );
-ok ( roundnear(0.01, $price_digital_call) == 0, 
-    'digital_call (' . $price_digital_call . ') -> 0');
+ok ( roundnear(0.01, $price_digitalcall) == 0, 
+    'digitalcall (' . $price_digitalcall . ') -> 0');
 
-# digital_put
-my $price_digital_put = Math::Business::BlackScholes::Binaries::digital_put(
+# digitalput
+my $price_digitalput = Math::Business::BlackScholes::Binaries::digitalput(
     $S, $barrier_h, 7/365, 0.002, 0.001, 0.11
 );
-ok ( roundnear(0.01, $price_digital_put) == 1, 
-    'digital_put (' . $price_digital_put . ') -> 1');
+ok ( roundnear(0.01, $price_digitalput) == 1, 
+    'digitalput (' . $price_digitalput . ') -> 1');
 
-# one_touch
-my $price_one_touch = Math::Business::BlackScholes::Binaries::one_touch(
+# onetouch
+my $price_onetouch = Math::Business::BlackScholes::Binaries::onetouch(
     $S, $barrier_h, 7/365, 0.002, 0.001, 0.11
 );
-ok ( roundnear(0.01, $price_one_touch) == 0, 
-    'one_touch (' . $price_one_touch . ') -> 0');
+ok ( roundnear(0.01, $price_onetouch) == 0, 
+    'onetouch (' . $price_onetouch . ') -> 0');
 
-# no_touch
-my $price_no_touch = Math::Business::BlackScholes::Binaries::no_touch(
+# notouch
+my $price_notouch = Math::Business::BlackScholes::Binaries::notouch(
     $S, $barrier_h, 7/365, 0.002, 0.001, 0.11
 );
-ok ( roundnear(0.01, $price_no_touch) == 1, 
-    'no_touch (' . $price_no_touch . ') -> 1');
+ok ( roundnear(0.01, $price_notouch) == 1, 
+    'notouch (' . $price_notouch . ') -> 1');
 
-# double_one_touch
-my $price_double_one_touch = Math::Business::BlackScholes::Binaries::double_one_touch(
+# doubleonetouch
+my $price_doubleonetouch = Math::Business::BlackScholes::Binaries::doubleonetouch(
     $S, $barrier_h, $barrier_l, 7/365, 0.002, 0.001, 0.11
 );
-# one_touch at lower barrier
-my $price_one_touch_lower_barrier = Math::Business::BlackScholes::Binaries::one_touch(
+# onetouch at lower barrier
+my $price_onetouch_lower_barrier = Math::Business::BlackScholes::Binaries::onetouch(
     $S, $barrier_l, 7/365, 0.002, 0.001, 0.11
 );
-ok ( $price_double_one_touch == $price_one_touch_lower_barrier,
-    'double_one_touch (higher barrier) -> one_touch (lower barrier)' );
+ok ( $price_doubleonetouch == $price_onetouch_lower_barrier,
+    'doubleonetouch (higher barrier) -> onetouch (lower barrier)' );
 
-# double_no_touch
-my $price_double_no_touch =
-Math::Business::BlackScholes::Binaries::double_no_touch(
+# doublenotouch
+my $price_doublenotouch =
+Math::Business::BlackScholes::Binaries::doublenotouch(
     $S, $barrier_h, $barrier_l, 7/365, 0.002, 0.001, 0.11
 );
-# no_touch at lower barrier
-my $price_no_touch_lower_barrier = Math::Business::BlackScholes::Binaries::no_touch(
+# notouch at lower barrier
+my $price_notouch_lower_barrier = Math::Business::BlackScholes::Binaries::notouch(
     $S, $barrier_l, 7/365, 0.002, 0.001, 0.11
 );
-ok ( $price_double_no_touch == $price_no_touch_lower_barrier,
-    'double_no_touch (higher barrier) -> no_touch (lower barrier)' );
+ok ( $price_doublenotouch == $price_notouch_lower_barrier,
+    'doublenotouch (higher barrier) -> notouch (lower barrier)' );
 
 Test::NoWarnings::had_no_warnings();
 done_testing();

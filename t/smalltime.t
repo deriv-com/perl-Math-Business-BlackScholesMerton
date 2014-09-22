@@ -14,25 +14,25 @@ my $sigma = 0.11;
 my $r     = 0.002;
 my $q     = 0.001;
 
-my $price_digital_call = Math::Business::BlackScholes::Binaries::digital_call(
+my $price_digitalcall = Math::Business::BlackScholes::Binaries::digitalcall(
     $S, $barrier, $t, $r, $r-$q, $sigma
 );
-ok ($price_digital_call == 0, 'price_digital_call');
+ok ($price_digitalcall == 0, 'price_digitalcall');
 
-my $price_digital_put = Math::Business::BlackScholes::Binaries::digital_put(
+my $price_digitalput = Math::Business::BlackScholes::Binaries::digitalput(
     $S, $barrier, $t, $r, $r-$q, $sigma
 );
-ok ( roundnear(0.01, $price_digital_put) == 1, 'price_digital_put');
+ok ( roundnear(0.01, $price_digitalput) == 1, 'price_digitalput');
 
-$price_digital_call = Math::Business::BlackScholes::Binaries::digital_call(
+$price_digitalcall = Math::Business::BlackScholes::Binaries::digitalcall(
     $S2, $barrier, $t, $r, $r-$q, $sigma
 );
-ok ( roundnear(0.01, $price_digital_call) == 1, 'price_digital_call');
+ok ( roundnear(0.01, $price_digitalcall) == 1, 'price_digitalcall');
 
-$price_digital_put = Math::Business::BlackScholes::Binaries::digital_put(
+$price_digitalput = Math::Business::BlackScholes::Binaries::digitalput(
     $S2, $barrier, $t, $r, $r-$q, $sigma
 );
-ok ( roundnear(0.01, $price_digital_put) == 0, 'price_digital_put');
+ok ( roundnear(0.01, $price_digitalput) == 0, 'price_digitalput');
 
 Test::NoWarnings::had_no_warnings();
 done_testing();
