@@ -18,25 +18,25 @@ my $q     = 0.001;
 
 my @test_cases = (
     {
-        type     => 'digitalcall',
+        type     => 'call',
         barriers => [1.36],
         foreign  => 0.3172,
         domestic => 0.3118,
     },
     {
-        type     => 'digitalput',
+        type     => 'put',
         barriers => [1.34],
         foreign  => 0.3096,
         domestic => 0.315,
     },
     {
-        type     => 'vanillacall',
+        type     => 'vanilla_call',
         barriers => [1.34],
         foreign  => 0.0140,
         domestic => 0.0141,
     },
     {
-        type     => 'vanillaput',
+        type     => 'vanilla_put',
         barriers => [1.34],
         foreign  => 0.0040,
         domestic => 0.0040,
@@ -54,37 +54,37 @@ my @test_cases = (
         domestic => 0.3739,
     },
     {
-        type     => 'endsbetween',
+        type     => 'expiryrange',
         barriers => [ 1.36, 1.34 ],
         foreign  => 0.3732,
         domestic => 0.3732,
     },
     {
-        type     => 'endsoutside',
+        type     => 'expirymiss',
         barriers => [ 1.36, 1.34 ],
         foreign  => 0.6268,
         domestic => 0.6268,
     },
     {
-        type     => 'doublenotouch',
+        type     => 'range',
         barriers => [ 1.36, 1.34 ],
         foreign  => 0.006902,
         domestic => 0.006902,
     },
     {
-        type     => 'doubleonetouch',
+        type     => 'upordown',
         barriers => [ 1.36, 1.34 ],
         foreign  => 0.993093,
         domestic => 0.993088,
     },
     {
-        type     => 'doublenotouch',
+        type     => 'range',
         barriers => [ 1.35, 1.34 ],
         foreign  => 0,
         domestic => 0,
     },
     {
-        type     => 'doubleonetouch',
+        type     => 'upordown',
         barriers => [ 1.36, 1.35 ],
         foreign  => 1,
         domestic => 1,

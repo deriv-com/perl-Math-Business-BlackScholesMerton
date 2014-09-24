@@ -12,18 +12,18 @@ my $sigma = 0.11;
 my $r     = 0.002;
 my $q     = 0.001;
 
-# digitalcall + digitalput = 1
-my $price_digitalcall = Math::Business::BlackScholes::Binaries::digitalcall(
+# call + put = 1
+my $price_call = Math::Business::BlackScholes::Binaries::call(
     $S, 1.36, 7/365, 0.002, 0.001, 0.11
 );
-my $price_digitalput = Math::Business::BlackScholes::Binaries::digitalput(
+my $price_put = Math::Business::BlackScholes::Binaries::put(
     $S, 1.36, 7/365, 0.002, 0.001, 0.11
 );
 
-my $rounded_price_digitalcall = roundnear(0.01, $price_digitalcall);
-my $rounded_price_digitalput = roundnear(0.01, $price_digitalput);
-ok ($rounded_price_digitalcall + $rounded_price_digitalput == 1, 
-    'digitalcall + digitalput = 1');
+my $rounded_price_call = roundnear(0.01, $price_call);
+my $rounded_price_put = roundnear(0.01, $price_put);
+ok ($rounded_price_call + $rounded_price_put == 1, 
+    'call + put = 1');
 
 
 # onetouch + notouch = 1
@@ -40,32 +40,32 @@ ok ($rounded_price_onetouch + $rounded_price_notouch == 1,
     'onetouch + notouch = 1');
 
 
-# endsbetween + endsoutside = 1
-my $price_endsbetween = Math::Business::BlackScholes::Binaries::endsbetween(
+# expiryrange + expirymiss = 1
+my $price_expiryrange = Math::Business::BlackScholes::Binaries::expiryrange(
     $S, 1.36, 1.34, 7/365, 0.002, 0.001, 0.11
 );
-my $price_endsoutside = Math::Business::BlackScholes::Binaries::endsoutside(
-    $S, 1.36, 1.34, 7/365, 0.002, 0.001, 0.11
-);
-
-my $rounded_price_endsbetween = roundnear(0.01, $price_endsbetween);
-my $rounded_price_endsoutside = roundnear(0.01, $price_endsoutside);
-ok ($rounded_price_endsbetween + $rounded_price_endsoutside == 1, 
-    'endsbetween + endsoutside = 1');
-
-
-# doublenotouch + doubleonetouch = 1
-my $price_doublenotouch = Math::Business::BlackScholes::Binaries::doublenotouch(
-    $S, 1.36, 1.34, 7/365, 0.002, 0.001, 0.11
-);
-my $price_doubleonetouch = Math::Business::BlackScholes::Binaries::doubleonetouch(
+my $price_expirymiss = Math::Business::BlackScholes::Binaries::expirymiss(
     $S, 1.36, 1.34, 7/365, 0.002, 0.001, 0.11
 );
 
-my $rounded_price_doublenotouch = roundnear(0.01, $price_doublenotouch);
-my $rounded_price_doubleonetouch = roundnear(0.01, $price_doubleonetouch);
-ok ($rounded_price_doublenotouch + $rounded_price_doubleonetouch == 1, 
-    'doublenotouch + doubleonetouch = 1');
+my $rounded_price_expiryrange = roundnear(0.01, $price_expiryrange);
+my $rounded_price_expirymiss = roundnear(0.01, $price_expirymiss);
+ok ($rounded_price_expiryrange + $rounded_price_expirymiss == 1, 
+    'expiryrange + expirymiss = 1');
+
+
+# range + upordown = 1
+my $price_range = Math::Business::BlackScholes::Binaries::range(
+    $S, 1.36, 1.34, 7/365, 0.002, 0.001, 0.11
+);
+my $price_upordown = Math::Business::BlackScholes::Binaries::upordown(
+    $S, 1.36, 1.34, 7/365, 0.002, 0.001, 0.11
+);
+
+my $rounded_price_range = roundnear(0.01, $price_range);
+my $rounded_price_upordown = roundnear(0.01, $price_upordown);
+ok ($rounded_price_range + $rounded_price_upordown == 1, 
+    'range + upordown = 1');
 
 Test::NoWarnings::had_no_warnings();
 done_testing();

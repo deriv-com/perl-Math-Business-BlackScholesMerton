@@ -14,19 +14,19 @@ my $q     = 0.001;
 my $barrier_h = exp(6);
 my $barrier_l = 1.34;
 
-# digitalcall
-my $price_digitalcall = Math::Business::BlackScholes::Binaries::digitalcall(
+# call
+my $price_call = Math::Business::BlackScholes::Binaries::call(
     $S, $barrier_h, 7/365, 0.002, 0.001, 0.11
 );
-ok ( roundnear(0.01, $price_digitalcall) == 0, 
-    'digitalcall (' . $price_digitalcall . ') -> 0');
+ok ( roundnear(0.01, $price_call) == 0, 
+    'call (' . $price_call . ') -> 0');
 
-# digitalput
-my $price_digitalput = Math::Business::BlackScholes::Binaries::digitalput(
+# put
+my $price_put = Math::Business::BlackScholes::Binaries::put(
     $S, $barrier_h, 7/365, 0.002, 0.001, 0.11
 );
-ok ( roundnear(0.01, $price_digitalput) == 1, 
-    'digitalput (' . $price_digitalput . ') -> 1');
+ok ( roundnear(0.01, $price_put) == 1, 
+    'put (' . $price_put . ') -> 1');
 
 # onetouch
 my $price_onetouch = Math::Business::BlackScholes::Binaries::onetouch(
@@ -42,28 +42,28 @@ my $price_notouch = Math::Business::BlackScholes::Binaries::notouch(
 ok ( roundnear(0.01, $price_notouch) == 1, 
     'notouch (' . $price_notouch . ') -> 1');
 
-# doubleonetouch
-my $price_doubleonetouch = Math::Business::BlackScholes::Binaries::doubleonetouch(
+# upordown
+my $price_upordown = Math::Business::BlackScholes::Binaries::upordown(
     $S, $barrier_h, $barrier_l, 7/365, 0.002, 0.001, 0.11
 );
 # onetouch at lower barrier
 my $price_onetouch_lower_barrier = Math::Business::BlackScholes::Binaries::onetouch(
     $S, $barrier_l, 7/365, 0.002, 0.001, 0.11
 );
-ok ( $price_doubleonetouch == $price_onetouch_lower_barrier,
-    'doubleonetouch (higher barrier) -> onetouch (lower barrier)' );
+ok ( $price_upordown == $price_onetouch_lower_barrier,
+    'upordown (higher barrier) -> onetouch (lower barrier)' );
 
-# doublenotouch
-my $price_doublenotouch =
-Math::Business::BlackScholes::Binaries::doublenotouch(
+# range
+my $price_range =
+Math::Business::BlackScholes::Binaries::range(
     $S, $barrier_h, $barrier_l, 7/365, 0.002, 0.001, 0.11
 );
 # notouch at lower barrier
 my $price_notouch_lower_barrier = Math::Business::BlackScholes::Binaries::notouch(
     $S, $barrier_l, 7/365, 0.002, 0.001, 0.11
 );
-ok ( $price_doublenotouch == $price_notouch_lower_barrier,
-    'doublenotouch (higher barrier) -> notouch (lower barrier)' );
+ok ( $price_range == $price_notouch_lower_barrier,
+    'range (higher barrier) -> notouch (lower barrier)' );
 
 Test::NoWarnings::had_no_warnings();
 done_testing();

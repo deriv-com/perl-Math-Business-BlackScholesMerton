@@ -17,10 +17,10 @@ my $q     = 0.001;
 $Math::Business::BlackScholes::Binaries::MIN_ACCURACY_UPORDOWN_PELSSER_1997 
     = 10**10;
 
-my $price_doubleonetouch = Math::Business::BlackScholes::Binaries::doubleonetouch(
+my $price_upordown = Math::Business::BlackScholes::Binaries::upordown(
     $S, $barrier_u, $barrier_l, $t, $r, $r-$q, $sigma
 );
-ok ($price_doubleonetouch == 0, 'price_doubleonetouch');
+ok ($price_upordown == 0, 'price_upordown');
 
 Test::NoWarnings::had_no_warnings();
 done_testing();

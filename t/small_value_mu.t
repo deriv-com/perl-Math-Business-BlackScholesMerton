@@ -19,7 +19,7 @@ $Math::Business::BlackScholes::Binaries::SMALL_VALUE_MU = 10;
 my $c = Math::Business::BlackScholes::Binaries::common_function_pelsser_1997(
     $S, $barrier_u, $barrier_l, $t, $r, $r-$q, $sigma, 0, 0,
 );
-ok (roundnear(0.01, $c) == 0.49, 'price_doubleonetouch');
+ok (roundnear(0.01, $c) == 0.49, 'price_upordown');
 
 Test::NoWarnings::had_no_warnings();
 done_testing();

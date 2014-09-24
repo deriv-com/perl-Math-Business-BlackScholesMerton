@@ -2,7 +2,7 @@ package Math::Business::BlackScholes::Binaries;
 use strict;
 use warnings;
 
-our $VERSION = '1.1';
+our $VERSION = '1.2';
 
 my $SMALLTIME = 1 / ( 60 * 60 * 24 * 365 );    # 1 second in years;
 
@@ -17,14 +17,14 @@ Math::Business::BlackScholes::Binaries
 
 =head1 VERSION
 
-Version 1.1
+Version 1.2
 
 =head1 SYNOPSIS
 
     use Math::Business::BlackScholes::Binaries;
 
     # price of a Call option
-    my $price_call_option = Math::Business::BlackScholes::Binaries::digitalcall(
+    my $price_call_option = Math::Business::BlackScholes::Binaries::call(
         1.35,       # stock price
         1.36,       # barrier
         (7/365),    # time
@@ -37,7 +37,7 @@ Version 1.1
 
 Prices options using the GBM model, all closed formulas.
 
-Important(a): Basically, onetouch, doubleonetouch and doubletouch have two cases of 
+Important(a): Basically, onetouch, upordown and doubletouch have two cases of 
 payoff either at end or at hit. We treat them differently. We use parameter 
 $w to differ them.
 
@@ -57,17 +57,17 @@ See [3] for Quanto formulas and examples
 
 =head1 SUBROUTINES
 
-=head2 vanillacall
+=head2 vanilla_call
 
     USAGE
-    my $price = vanillacall($S, $K, $t, $r_q, $mu, $sigma)
+    my $price = vanilla_call($S, $K, $t, $r_q, $mu, $sigma)
 
     DESCRIPTION
     Price of a Vanilla Call
 
 =cut
 
-sub vanillacall {
+sub vanilla_call {
     my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
 
     my $d1 =
@@ -80,17 +80,17 @@ sub vanillacall {
       ( $S * exp( $mu * $t ) * pnorm($d1) - $K * pnorm($d2) );
 }
 
-=head2 vanillaput
+=head2 vanilla_put
 
     USAGE
-    my $price = vanillaput($S, $K, $t, $r_q, $mu, sigma)
+    my $price = vanilla_put($S, $K, $t, $r_q, $mu, sigma)
 
     DESCRIPTION
     Price a standard Vanilla Put
 
 =cut
 
-sub vanillaput {
+sub vanilla_put {
     my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
 
     my $d1 =
@@ -103,10 +103,10 @@ sub vanillaput {
       ( $S * exp( $mu * $t ) * pnorm( -$d1 ) - $K * pnorm( -$d2 ) );
 }
 
-=head2 digitalcall
+=head2 call
 
     USAGE
-    my $price = digitalcall($S, $K, $t, $r_q, $mu, $sigma)
+    my $price = call($S, $K, $t, $r_q, $mu, $sigma)
 
     PARAMS
     $S => stock price
@@ -132,14 +132,14 @@ sub vanillaput {
     "wrongly" to 0.5 if S=K).
 
     NOTE
-    Note that we have digitalcall = - dCall/dStrike
+    Note that we have call = - dCall/dStrike
     pair Foreign/Domestic
 
     see [3] for $r_q and $mu for quantos
 
 =cut
 
-sub digitalcall {
+sub call {
     my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
 
     if ( $t < $SMALLTIME ) {
@@ -149,10 +149,10 @@ sub digitalcall {
     return exp( -$r_q * $t ) * pnorm( d2( $S, $K, $t, $r_q, $mu, $sigma ) );
 }
 
-=head2 digitalput
+=head2 put
 
     USAGE
-    my $price = digitalput($S, $K, $t, $r_q, $mu, $sigma)
+    my $price = put($S, $K, $t, $r_q, $mu, $sigma)
 
     PARAMS
     $S => stock price
@@ -167,7 +167,7 @@ sub digitalcall {
 
 =cut
 
-sub digitalput {
+sub put {
     my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
 
     if ( $t < $SMALLTIME ) {
@@ -191,10 +191,10 @@ sub d2 {
       ( $sigma * sqrt($t) );
 }
 
-=head2 endsoutside
+=head2 expirymiss
 
     USAGE
-    my $price = endsoutside($S, $U, $D, $t, $r_q, $mu, $sigma)
+    my $price = expirymiss($S, $U, $D, $t, $r_q, $mu, $sigma)
 
     PARAMS
     $S => stock price
@@ -212,19 +212,19 @@ sub d2 {
 
 =cut
 
-sub endsoutside {
+sub expirymiss {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma ) = @_;
 
-    my ($call_price) = digitalcall( $S, $U, $t, $r_q, $mu, $sigma );
-    my ($put_price) = digitalput( $S, $D, $t, $r_q, $mu, $sigma );
+    my ($call_price) = call( $S, $U, $t, $r_q, $mu, $sigma );
+    my ($put_price) = put( $S, $D, $t, $r_q, $mu, $sigma );
 
     return $call_price + $put_price;
 }
 
-=head2 endsbetween
+=head2 expiryrange
 
     USAGE
-    my $price = endsbetween($S, $U, $D, $t, $r_q, $mu, $sigma)
+    my $price = expiryrange($S, $U, $D, $t, $r_q, $mu, $sigma)
 
     PARAMS
     $S => stock price
@@ -242,10 +242,10 @@ sub endsoutside {
 
 =cut
 
-sub endsbetween {
+sub expiryrange {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma ) = @_;
 
-    return exp( -$r_q * $t ) - endsoutside( $S, $U, $D, $t, $r_q, $mu, $sigma );
+    return exp( -$r_q * $t ) - expirymiss( $S, $U, $D, $t, $r_q, $mu, $sigma );
 }
 
 =head2 onetouch
@@ -355,10 +355,10 @@ our $SMALL_VALUE_MU                     = 1e-10;
 #
 my $MACHINE_EPSILON = machine_epsilon();
 
-=head2 doubleonetouch
+=head2 upordown
 
     USAGE
-    my $price = doubleonetouch(($S, $U, $D, $t, $r_q, $mu, $sigma, $w))
+    my $price = upordown(($S, $U, $D, $t, $r_q, $mu, $sigma, $w))
 
     PARAMS
     $S stock price
@@ -376,7 +376,7 @@ my $MACHINE_EPSILON = machine_epsilon();
 
 =cut
 
-sub doubleonetouch {
+sub upordown {
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
 
     # When the contract already reached it's expiry and not yet reach it
@@ -840,10 +840,10 @@ sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
         $mu, $sigma, $w, $accuracy );
 }
 
-=head2 doublenotouch
+=head2 range
 
     USAGE
-    my $price = doublenotouch($S, $U, $D, $t, $r_q, $mu, $sigma, $w)
+    my $price = range($S, $U, $D, $t, $r_q, $mu, $sigma, $w)
 
     PARAMS
     $S stock price
@@ -857,20 +857,20 @@ sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
     see [3] for $r_q and $mu for quantos
 
     DESCRIPTION
-    Price a doublenotouch contract.
+    Price a range contract.
 
 =cut
 
-sub doublenotouch {
+sub range {
 
-    # payout time $w is only a dummy. doublenotouch contracts always payout at end.
+    # payout time $w is only a dummy. range contracts always payout at end.
     my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
 
-    # doublenotouch always pay out at end
+    # range always pay out at end
     $w = 1;
 
     return
-      exp( -$r_q * $t ) - doubleonetouch( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
+      exp( -$r_q * $t ) - upordown( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
 }
 
 =head1 DEPENDENCIES
