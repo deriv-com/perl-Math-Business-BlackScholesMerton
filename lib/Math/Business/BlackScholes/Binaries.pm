@@ -2,7 +2,7 @@ package Math::Business::BlackScholes::Binaries;
 use strict;
 use warnings;
 
-our $VERSION = '1.2';
+our $VERSION = '1.21';
 
 my $SMALLTIME = 1 / ( 60 * 60 * 24 * 365 );    # 1 second in years;
 
@@ -17,7 +17,7 @@ Math::Business::BlackScholes::Binaries
 
 =head1 VERSION
 
-Version 1.2
+Version 1.21
 
 =head1 SYNOPSIS
 
@@ -286,7 +286,9 @@ sub onetouch {
     my $theta  = ( ($mu) / $sigma ) + ( 0.5 * $sigma );
     my $theta_ = ( ($mu) / $sigma ) - ( 0.5 * $sigma );
 
-    my $v_ = sqrt( ( $theta_ * $theta_ ) + ( 2 * ( 1 - $w ) * $r_q ) );
+    # Floor v_ squared at zero in case negative interest rates push it negative.
+    # See: Barrier Options under Negative Rates in Black-Scholes (Le Floc’h and Pruell, 2014)
+    my $v_ = sqrt( max( 0, ( $theta_ * $theta_ ) + ( 2 * ( 1 - $w ) * $r_q ) ) ) ;
 
     my $e = ( log( $S / $U ) - ( $sigma * $v_ * $t ) ) / ( $sigma * $sqrt_t );
     my $e_ = ( -log( $S / $U ) - ( $sigma * $v_ * $t ) ) / ( $sigma * $sqrt_t );
