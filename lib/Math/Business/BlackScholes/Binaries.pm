@@ -2,7 +2,7 @@ package Math::Business::BlackScholes::Binaries;
 use strict;
 use warnings;
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 my $SMALLTIME = 1 / ( 60 * 60 * 24 * 365 );    # 1 second in years;
 
@@ -13,11 +13,11 @@ use Machine::Epsilon;
 
 =head1 NAME
 
-Math::Business::BlackScholes::Binaries 
+Math::Business::BlackScholes::Binaries
 
 =head1 VERSION
 
-Version 1.21
+Version 1.22
 
 =head1 SYNOPSIS
 
@@ -37,8 +37,8 @@ Version 1.21
 
 Prices options using the GBM model, all closed formulas.
 
-Important(a): Basically, onetouch, upordown and doubletouch have two cases of 
-payoff either at end or at hit. We treat them differently. We use parameter 
+Important(a): Basically, onetouch, upordown and doubletouch have two cases of
+payoff either at end or at hit. We treat them differently. We use parameter
 $w to differ them.
 
 $w = 0: payoff at hit time.
@@ -46,7 +46,7 @@ $w = 1: payoff at end.
 
 Our current contracts pay rebate at hit time, so we set $w = 0 by default.
 
-Important(b) :Furthermore, for all contracts, we allow a different 
+Important(b) :Furthermore, for all contracts, we allow a different
 payout currency (Quantos).
 
 Paying domestic currency (JPY if for USDJPY) = correlation coefficient is ZERO.
@@ -119,11 +119,11 @@ sub vanilla_put {
     DESCRIPTION
     Price a Call and remove the N(d2) part if the time is too small
 
-    EXPLANATION 
-    The definition of the contract is that if S > K, it gives 
+    EXPLANATION
+    The definition of the contract is that if S > K, it gives
     full payout (1).  However the formula DC(T,K) = e^(-rT) N(d2) will not be
-    correct when T->0 and K=S.  The value of DC(T,K) for this case will be 0.5. 
-    
+    correct when T->0 and K=S.  The value of DC(T,K) for this case will be 0.5.
+
     The formula is actually "correct" because when T->0 and S=K, the probability
     should just be 0.5 that the contract wins, moving up or down is equally
     likely in that very small amount of time left. Thus the only problem is
@@ -265,7 +265,7 @@ sub expiryrange {
 sub onetouch {
     my ( $S, $U, $t, $r_q, $mu, $sigma, $w ) = @_;
 
-    # w = 0, rebate paid at hit (good way to remember is that waiting 
+    # w = 0, rebate paid at hit (good way to remember is that waiting
     #   time to get paid = 0)
     # w = 1, rebate paid at end.
 
@@ -391,7 +391,7 @@ sub upordown {
     # $w = 1, paid at end
     if ( not defined $w ) { $w = 0; }
 
-    # spot is outside [$D, $U] --> contract is expired with full payout, 
+    # spot is outside [$D, $U] --> contract is expired with full payout,
     # one barrier is already hit (can happen due to shift markup):
     if ( $S >= $U or $S <= $D ) {
         return $w ? exp( -$t * $r_q ) : 1;
@@ -407,7 +407,7 @@ sub upordown {
 #
 # For example try this:
 #
-#   my ($S, $U, $D, $t, $r, $q, $vol, $w) 
+#   my ($S, $U, $D, $t, $r, $q, $vol, $w)
 #       = (100.00, 118.97, 99.00, 30/365, 0.1, 0.02, 0.01, 1);
 #   $up_price = Math::Business::BlackScholes::Binaries::ot_up_ko_down_pelsser_1997(
 #       $S,$U,$D,$t,$r,$q,$vol,$w);
@@ -528,8 +528,8 @@ sub common_function_pelsser_1997 {
     # $w = 1, paid at end
 
     my $mu_new = $mu - ( 0.5 * $sigma * $sigma );
-    my $mu_dash = sqrt(
-        ( $mu_new * $mu_new ) + ( 2 * $sigma * $sigma * $r_q * ( 1 - $w ) ) );
+    my $mu_dash = sqrt( max( 0,
+        ( $mu_new * $mu_new ) + ( 2 * $sigma * $sigma * $r_q * ( 1 - $w ) ) ) );
 
     my $series_part = 0;
     my $hyp_part    = 0;
@@ -651,8 +651,8 @@ sub get_stability_constant_pelsser_1997 {
     my $h       = log( $U / $D );
     my $x       = log( $S / $D );
     my $mu_new  = $mu - ( 0.5 * $sigma * $sigma );
-    my $mu_dash = sqrt(
-        ( $mu_new * $mu_new ) + ( 2 * $sigma * $sigma * $r_q * ( 1 - $w ) ) );
+    my $mu_dash = sqrt( max( 0,
+        ( $mu_new * $mu_new ) + ( 2 * $sigma * $sigma * $r_q * ( 1 - $w ) ) ) );
 
     my $numerator = $MIN_ACCURACY_UPORDOWN_PELSSER_1997 *
       exp( 1.0 - $mu_new * ( ( $eta * $h ) - $x ) / ( $sigma * $sigma ) );
@@ -779,8 +779,8 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
     my $h       = log( $U / $D );
     my $x       = log( $S / $D );
     my $mu_new  = $mu - ( 0.5 * $sigma * $sigma );
-    my $mu_dash = sqrt(
-        ( $mu_new * $mu_new ) + ( 2 * $sigma * $sigma * $r_q * ( 1 - $w ) ) );
+    my $mu_dash = sqrt( max( 0,
+        ( $mu_new * $mu_new ) + ( 2 * $sigma * $sigma * $r_q * ( 1 - $w ) ) ) );
 
     my $A = ( $mu_dash * $mu_dash ) / ( 2 * $sigma * $sigma );
     my $B = ( $pi * $pi * $sigma * $sigma ) / ( 2 * $h * $h );
