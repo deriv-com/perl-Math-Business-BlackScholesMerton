@@ -18,5 +18,6 @@ before_install:
     - "cpanm -n Math::CDF"
     - "cpanm -n Machine::Epsilon"
     - "cpanm -n Devel::Cover::Report::Coveralls"
+    - "cpanm -n Test::NoWarnings"
 script:
     perl Makefile.PL && make test && cover -test -report coveralls
