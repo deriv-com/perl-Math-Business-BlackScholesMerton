@@ -13,10 +13,10 @@ before_install:
     - build-perl
     - perl -V
     # install prereqs
-    - "cpanm Test::Most"
-    - "cpanm Test::Exception"
-    - "cpanm Math::CDF"
-    - "cpanm Machine::Epsilon"
-    - "cpanm Devel::Cover::Report::Coveralls"
+    - "cpanm -n Test::Most"
+    - "cpanm -n Test::Exception"
+    - "cpanm -n Math::CDF"
+    - "cpanm -n Machine::Epsilon"
+    - "cpanm -n Devel::Cover::Report::Coveralls"
 script:
     perl Makefile.PL && make test && cover -test -report coveralls
