@@ -19,7 +19,9 @@ before_install:
     - "cpanm -n Test::Exception"
     - "cpanm -n Math::CDF"
     - "cpanm -n Machine::Epsilon"
-    - "cpanm -n Devel::Cover::Report::Coveralls"
+    - "cpanm -n Test::Requires::Git"
+    - "cpanm -n Devel::Cover::Report::Codecov"
     - "cpanm -n Test::NoWarnings"
 script:
-    perl Makefile.PL && make test && cover -test -report coveralls
+    perl Makefile.PL && make test && cover -test -report codecov
+
