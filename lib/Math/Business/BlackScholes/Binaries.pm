@@ -734,7 +734,6 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
             . "required!! delta=$delta, B=$B for input parameters S=$S, "
             . "U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, "
             . "accuracy=$accuracy";
-        return $MAX_ITERATIONS_UPORDOWN_PELSSER_1997;
     }
 
     # Check that condition is satisfied
