@@ -9,7 +9,7 @@ my $SMALLTIME = 1 / (60 * 60 * 24 * 365);    # 1 second in years;
 use List::Util qw(max);
 use Math::CDF qw(pnorm);
 use Math::Trig;
-use Machine :: Epsilon;
+use Machine::Epsilon;
 
 # ABSTRACT: Algorithm of Math::Business::BlackScholes::Binaries
 
