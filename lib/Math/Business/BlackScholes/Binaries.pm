@@ -174,7 +174,7 @@ returns the DS term common to many BlackScholes formulae.
 =cut
 
 sub d2 {
-    my ($S, $K, $t, $r_q, $mu, $sigma) = @_;
+    my ($S, $K, $t, undef, $mu, $sigma) = @_;
 
     return (log($S / $K) + ($mu - $sigma * $sigma / 2.0) * $t) / ($sigma * sqrt($t));
 }
@@ -271,7 +271,6 @@ sub onetouch {
 
     my $sqrt_t = sqrt($t);
 
-    my $theta  = (($mu) / $sigma) + (0.5 * $sigma);
     my $theta_ = (($mu) / $sigma) - (0.5 * $sigma);
 
     # Floor v_ squared at zero in case negative interest rates push it negative.
@@ -606,7 +605,6 @@ sub get_stability_constant_pelsser_1997 {
     my $h       = log($U / $D);
     my $x       = log($S / $D);
     my $mu_new  = $mu - (0.5 * $sigma * $sigma);
-    my $mu_dash = sqrt(max(0, ($mu_new * $mu_new) + (2 * $sigma * $sigma * $r_q * (1 - $w))));
 
     my $numerator = $MIN_ACCURACY_UPORDOWN_PELSSER_1997 * exp(1.0 - $mu_new * (($eta * $h) - $x) / ($sigma * $sigma));
     my $denominator = (exp(1) * (Math::Trig::pi + $p)) + (max($mu_new * (($eta * $h) - $x), 0.0) * Math::Trig::pi / ($sigma**2));
@@ -655,7 +653,6 @@ sub ot_down_ko_up_pelsser_1997 {
     my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w) = @_;
 
     my $mu_new = $mu - (0.5 * $sigma * $sigma);
-    my $h      = log($U / $D);
     my $x      = log($S / $D);
 
     return exp(-$mu_new * $x / ($sigma * $sigma)) * common_function_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, 0);
@@ -685,8 +682,6 @@ sub get_min_iterations_pelsser_1997 {
         $accuracy = $MIN_ACCURACY_UPORDOWN_PELSSER_1997;
     }
 
-    my $h = log($U / $D);
-    my $x = log($S / $D);
 
     my $it_up = _get_min_iterations_ot_up_ko_down_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy);
     my $it_down = _get_min_iterations_ot_down_ko_up_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy);
@@ -767,7 +762,6 @@ sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
     my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy) = @_;
 
     my $h      = log($U / $D);
-    my $x      = log($S / $D);
     my $mu_new = $mu - (0.5 * $sigma * $sigma);
 
     $accuracy = $accuracy * exp($mu_new * $h / ($sigma * $sigma));
