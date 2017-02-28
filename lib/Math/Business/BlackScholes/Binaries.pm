@@ -4,20 +4,18 @@ use warnings;
 
 our $VERSION = '1.22';
 
-my $SMALLTIME = 1 / ( 60 * 60 * 24 * 365 );    # 1 second in years;
+my $SMALLTIME = 1 / (60 * 60 * 24 * 365);    # 1 second in years;
 
 use List::Util qw(max);
 use Math::CDF qw(pnorm);
 use Math::Trig;
 use Machine::Epsilon;
 
+# ABSTRACT: Algorithm of Math::Business::BlackScholes::Binaries
+
 =head1 NAME
 
 Math::Business::BlackScholes::Binaries
-
-=head1 VERSION
-
-Version 1.22
 
 =head1 SYNOPSIS
 
@@ -68,16 +66,12 @@ See [3] for Quanto formulas and examples
 =cut
 
 sub vanilla_call {
-    my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
+    my ($S, $K, $t, $r_q, $mu, $sigma) = @_;
 
-    my $d1 =
-      ( log( $S / $K ) + ( $mu + $sigma * $sigma / 2.0 ) * $t ) /
-      ( $sigma * sqrt($t) );
-    my $d2 = $d1 - ( $sigma * sqrt($t) );
+    my $d1 = (log($S / $K) + ($mu + $sigma * $sigma / 2.0) * $t) / ($sigma * sqrt($t));
+    my $d2 = $d1 - ($sigma * sqrt($t));
 
-    return
-      exp( -$r_q * $t ) *
-      ( $S * exp( $mu * $t ) * pnorm($d1) - $K * pnorm($d2) );
+    return exp(-$r_q * $t) * ($S * exp($mu * $t) * pnorm($d1) - $K * pnorm($d2));
 }
 
 =head2 vanilla_put
@@ -91,16 +85,12 @@ sub vanilla_call {
 =cut
 
 sub vanilla_put {
-    my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
+    my ($S, $K, $t, $r_q, $mu, $sigma) = @_;
 
-    my $d1 =
-      ( log( $S / $K ) + ( $mu + $sigma * $sigma / 2.0 ) * $t ) /
-      ( $sigma * sqrt($t) );
-    my $d2 = $d1 - ( $sigma * sqrt($t) );
+    my $d1 = (log($S / $K) + ($mu + $sigma * $sigma / 2.0) * $t) / ($sigma * sqrt($t));
+    my $d2 = $d1 - ($sigma * sqrt($t));
 
-    return -1 *
-      exp( -$r_q * $t ) *
-      ( $S * exp( $mu * $t ) * pnorm( -$d1 ) - $K * pnorm( -$d2 ) );
+    return -1 * exp(-$r_q * $t) * ($S * exp($mu * $t) * pnorm(-$d1) - $K * pnorm(-$d2));
 }
 
 =head2 call
@@ -140,13 +130,13 @@ sub vanilla_put {
 =cut
 
 sub call {
-    my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
+    my ($S, $K, $t, $r_q, $mu, $sigma) = @_;
 
-    if ( $t < $SMALLTIME ) {
-        return ( $S > $K ) ? exp( -$r_q * $t ) : 0;
+    if ($t < $SMALLTIME) {
+        return ($S > $K) ? exp(-$r_q * $t) : 0;
     }
 
-    return exp( -$r_q * $t ) * pnorm( d2( $S, $K, $t, $r_q, $mu, $sigma ) );
+    return exp(-$r_q * $t) * pnorm(d2($S, $K, $t, $r_q, $mu, $sigma));
 }
 
 =head2 put
@@ -168,14 +158,13 @@ sub call {
 =cut
 
 sub put {
-    my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
+    my ($S, $K, $t, $r_q, $mu, $sigma) = @_;
 
-    if ( $t < $SMALLTIME ) {
-        return ( $S < $K ) ? exp( -$r_q * $t ) : 0;
+    if ($t < $SMALLTIME) {
+        return ($S < $K) ? exp(-$r_q * $t) : 0;
     }
 
-    return
-      exp( -$r_q * $t ) * pnorm( -1 * d2( $S, $K, $t, $r_q, $mu, $sigma ) );
+    return exp(-$r_q * $t) * pnorm(-1 * d2($S, $K, $t, $r_q, $mu, $sigma));
 }
 
 =head2 d2
@@ -185,10 +174,9 @@ returns the DS term common to many BlackScholes formulae.
 =cut
 
 sub d2 {
-    my ( $S, $K, $t, $r_q, $mu, $sigma ) = @_;
+    my ($S, $K, $t, undef, $mu, $sigma) = @_;
 
-    return ( log( $S / $K ) + ( $mu - $sigma * $sigma / 2.0 ) * $t ) /
-      ( $sigma * sqrt($t) );
+    return (log($S / $K) + ($mu - $sigma * $sigma / 2.0) * $t) / ($sigma * sqrt($t));
 }
 
 =head2 expirymiss
@@ -213,10 +201,10 @@ sub d2 {
 =cut
 
 sub expirymiss {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma) = @_;
 
-    my ($call_price) = call( $S, $U, $t, $r_q, $mu, $sigma );
-    my ($put_price) = put( $S, $D, $t, $r_q, $mu, $sigma );
+    my ($call_price) = call($S, $U, $t, $r_q, $mu, $sigma);
+    my ($put_price) = put($S, $D, $t, $r_q, $mu, $sigma);
 
     return $call_price + $put_price;
 }
@@ -243,9 +231,9 @@ sub expirymiss {
 =cut
 
 sub expiryrange {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma) = @_;
 
-    return exp( -$r_q * $t ) - expirymiss( $S, $U, $D, $t, $r_q, $mu, $sigma );
+    return exp(-$r_q * $t) - expirymiss($S, $U, $D, $t, $r_q, $mu, $sigma);
 }
 
 =head2 onetouch
@@ -263,7 +251,7 @@ sub expiryrange {
 =cut
 
 sub onetouch {
-    my ( $S, $U, $t, $r_q, $mu, $sigma, $w ) = @_;
+    my ($S, $U, $t, $r_q, $mu, $sigma, $w) = @_;
 
     # w = 0, rebate paid at hit (good way to remember is that waiting
     #   time to get paid = 0)
@@ -273,31 +261,28 @@ sub onetouch {
     # settlement time, it is consider an unexpired contract but will come to
     # here with t=0 and it will caused the formula to die hence set it to the
     # SMALLTIME which is 1 second
-    $t = max( $SMALLTIME, $t );
+    $t = max($SMALLTIME, $t);
 
     $w ||= 0;
 
     # eta = -1, one touch up
     # eta = 1, one touch down
-    my $eta = ( $S < $U ) ? -1 : 1;
+    my $eta = ($S < $U) ? -1 : 1;
 
     my $sqrt_t = sqrt($t);
 
-    my $theta  = ( ($mu) / $sigma ) + ( 0.5 * $sigma );
-    my $theta_ = ( ($mu) / $sigma ) - ( 0.5 * $sigma );
+    my $theta_ = (($mu) / $sigma) - (0.5 * $sigma);
 
     # Floor v_ squared at zero in case negative interest rates push it negative.
     # See: Barrier Options under Negative Rates in Black-Scholes (Le Floc’h and Pruell, 2014)
-    my $v_ = sqrt( max( 0, ( $theta_ * $theta_ ) + ( 2 * ( 1 - $w ) * $r_q ) ) ) ;
+    my $v_ = sqrt(max(0, ($theta_ * $theta_) + (2 * (1 - $w) * $r_q)));
 
-    my $e = ( log( $S / $U ) - ( $sigma * $v_ * $t ) ) / ( $sigma * $sqrt_t );
-    my $e_ = ( -log( $S / $U ) - ( $sigma * $v_ * $t ) ) / ( $sigma * $sqrt_t );
+    my $e = (log($S / $U) - ($sigma * $v_ * $t)) / ($sigma * $sqrt_t);
+    my $e_ = (-log($S / $U) - ($sigma * $v_ * $t)) / ($sigma * $sqrt_t);
 
-    my $price =
-      ( ( $U / $S )**( ( $theta_ + $v_ ) / $sigma ) ) * pnorm( -$eta * $e ) +
-      ( ( $U / $S )**( ( $theta_ - $v_ ) / $sigma ) ) * pnorm( $eta * $e_ );
+    my $price = (($U / $S)**(($theta_ + $v_) / $sigma)) * pnorm(-$eta * $e) + (($U / $S)**(($theta_ - $v_) / $sigma)) * pnorm($eta * $e_);
 
-    return exp( -$w * $r_q * $t ) * $price;
+    return exp(-$w * $r_q * $t) * $price;
 }
 
 =head2 notouch
@@ -325,12 +310,12 @@ sub onetouch {
 =cut
 
 sub notouch {
-    my ( $S, $U, $t, $r_q, $mu, $sigma ) = @_;
+    my ($S, $U, $t, $r_q, $mu, $sigma) = @_;
 
     # No touch contract always pay out at end
     my $w = 1;
 
-    return exp( -$r_q * $t ) - onetouch( $S, $U, $t, $r_q, $mu, $sigma, $w );
+    return exp(-$r_q * $t) - onetouch($S, $U, $t, $r_q, $mu, $sigma, $w);
 }
 
 # These variables require 'our' only because they need to be
@@ -379,22 +364,22 @@ my $MACHINE_EPSILON = machine_epsilon();
 =cut
 
 sub upordown {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w) = @_;
 
     # When the contract already reached it's expiry and not yet reach it
     # settlement time, it is considered an unexpired contract but will come to
     # here with t=0 and it will caused the formula to die hence set it to the
     # SMALLTIME whiich is 1 second
-    $t = max( $t, $SMALLTIME );
+    $t = max($t, $SMALLTIME);
 
     # $w = 0, paid at hit
     # $w = 1, paid at end
-    if ( not defined $w ) { $w = 0; }
+    if (not defined $w) { $w = 0; }
 
     # spot is outside [$D, $U] --> contract is expired with full payout,
     # one barrier is already hit (can happen due to shift markup):
-    if ( $S >= $U or $S <= $D ) {
-        return $w ? exp( -$t * $r_q ) : 1;
+    if ($S >= $U or $S <= $D) {
+        return $w ? exp(-$t * $r_q) : 1;
     }
 
 #
@@ -421,14 +406,12 @@ sub upordown {
 #   CONDITION 3:    UPORDOWN[U,D] > ONETOUCH[D]
 #   CONDITION 4:    ONETOUCH[U] + ONETOUCH[D] >= $MIN_ACCURACY_UPORDOWN_PELSSER_1997
 #
-    my $onetouch_up_prob   = onetouch( $S, $U, $t, $r_q, $mu, $sigma, $w );
-    my $onetouch_down_prob = onetouch( $S, $D, $t, $r_q, $mu, $sigma, $w );
+    my $onetouch_up_prob   = onetouch($S, $U, $t, $r_q, $mu, $sigma, $w);
+    my $onetouch_down_prob = onetouch($S, $D, $t, $r_q, $mu, $sigma, $w);
 
     my $upordown_prob;
 
-    if ( $onetouch_up_prob + $onetouch_down_prob <
-        $MIN_ACCURACY_UPORDOWN_PELSSER_1997 )
-    {
+    if ($onetouch_up_prob + $onetouch_down_prob < $MIN_ACCURACY_UPORDOWN_PELSSER_1997) {
 
         # CONDITION 4:
         #   The probability is too small for the Pelsser formula to be correct.
@@ -437,21 +420,18 @@ sub upordown {
         #   Here we assume that the ONETOUCH formula is perfect and never give
         #   wrong values (e.g. negative).
         return 0;
-    }
-    elsif ( $onetouch_up_prob xor $onetouch_down_prob ) {
+    } elsif ($onetouch_up_prob xor $onetouch_down_prob) {
 
         # One of our ONETOUCH probabilities is 0.
         # That means our upordown prob is equivalent to the other one.
         # Pelsser recompute will either be the same or wrong.
         # Continuing to assume the ONETOUCH is perfect.
-        $upordown_prob = max( $onetouch_up_prob, $onetouch_down_prob );
-    }
-    else {
+        $upordown_prob = max($onetouch_up_prob, $onetouch_down_prob);
+    } else {
 
         # THIS IS THE ONLY PLACE IT SHOULD BE!
         $upordown_prob =
-          ot_up_ko_down_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) +
-          ot_down_ko_up_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
+            ot_up_ko_down_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w) + ot_down_ko_up_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w);
     }
 
     # CONDITION 4:
@@ -459,16 +439,13 @@ sub upordown {
     #   Not really needed to check for payout at hit, because RANGE is
     #   always at end, and thus the value (DISCOUNT - UPORDOWN) is not
     #   evaluated.
-    if ( $w == 1 ) {
+    if ($w == 1) {
 
         # Since the difference is already less than the min accuracy,
         # the value [payout - upordown], which is the RANGE formula
         # can become negative.
-        if (
-            abs( exp( -$r_q * $t ) - $upordown_prob ) <
-            $MIN_ACCURACY_UPORDOWN_PELSSER_1997 )
-        {
-            $upordown_prob = exp( -$r_q * $t );
+        if (abs(exp(-$r_q * $t) - $upordown_prob) < $MIN_ACCURACY_UPORDOWN_PELSSER_1997) {
+            $upordown_prob = exp(-$r_q * $t);
         }
     }
 
@@ -477,18 +454,15 @@ sub upordown {
 #   the minimum accuracy, and this small value uses that min accuracy, it is
 #   very hard for the conditions to pass.
     my $SMALL_TOLERANCE = 0.00001;
-    if (
-        not( $upordown_prob <
-            $onetouch_up_prob + $onetouch_down_prob + $SMALL_TOLERANCE )
-        or not( $upordown_prob + $SMALL_TOLERANCE > $onetouch_up_prob )
-        or not( $upordown_prob + $SMALL_TOLERANCE > $onetouch_down_prob )
-      )
+    if (   not($upordown_prob < $onetouch_up_prob + $onetouch_down_prob + $SMALL_TOLERANCE)
+        or not($upordown_prob + $SMALL_TOLERANCE > $onetouch_up_prob)
+        or not($upordown_prob + $SMALL_TOLERANCE > $onetouch_down_prob))
     {
         die "UPORDOWN price sanity checks failed for S=$S, U=$U, "
-          . "D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w. "
-          . "UPORDOWN PROB=$upordown_prob , "
-          . "ONETOUCH_UP PROB=$onetouch_up_prob , "
-          . "ONETOUCH_DOWN PROB=$onetouch_down_prob";
+            . "D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w. "
+            . "UPORDOWN PROB=$upordown_prob , "
+            . "ONETOUCH_UP PROB=$onetouch_up_prob , "
+            . "ONETOUCH_DOWN PROB=$onetouch_down_prob";
     }
 
     return $upordown_prob;
@@ -508,28 +482,26 @@ sub common_function_pelsser_1997 {
 
     # h: normalized high barrier, log(U/L)
     # x: normalized spot, log(S/L)
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, $eta ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $eta) = @_;
 
     my $pi = Math::Trig::pi;
 
-    my $h = log( $U / $D );
-    my $x = log( $S / $D );
+    my $h = log($U / $D);
+    my $x = log($S / $D);
 
     # $eta = 1, onetouch up knockout down
     # $eta = 0, onetouch down knockout up
     # This variable used to check stability
-    if ( not defined $eta ) {
-        die "Wrong usage of this function for S=$S, U=$U, D=$D, "
-          . "t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, eta not defined.";
+    if (not defined $eta) {
+        die "Wrong usage of this function for S=$S, U=$U, D=$D, " . "t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, eta not defined.";
     }
-    if ( $eta == 0 ) { $x = $h - $x; }
+    if ($eta == 0) { $x = $h - $x; }
 
     # $w = 0, paid at hit
     # $w = 1, paid at end
 
-    my $mu_new = $mu - ( 0.5 * $sigma * $sigma );
-    my $mu_dash = sqrt( max( 0,
-        ( $mu_new * $mu_new ) + ( 2 * $sigma * $sigma * $r_q * ( 1 - $w ) ) ) );
+    my $mu_new = $mu - (0.5 * $sigma * $sigma);
+    my $mu_dash = sqrt(max(0, ($mu_new * $mu_new) + (2 * $sigma * $sigma * $r_q * (1 - $w))));
 
     my $series_part = 0;
     my $hyp_part    = 0;
@@ -537,34 +509,21 @@ sub common_function_pelsser_1997 {
     # These constants will determine whether or not this contract can be
     # evaluated to a predefined accuracy. It is VERY IMPORTANT because
     # if these conditions are not met, the prices can be complete nonsense!!
-    my $stability_constant =
-      get_stability_constant_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma,
-        $w, $eta, 1 );
+    my $stability_constant = get_stability_constant_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $eta, 1);
 
     # The number of iterations is important when recommending the
     # range of the upper/lower barriers on our site. If we recommend
     # a range that is too big and our iteration is too small, the
     # price will be wrong! We must know the rate of convergence of
     # the formula used.
-    my $iterations_required =
-      get_min_iterations_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
+    my $iterations_required = get_min_iterations_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w);
 
-    for ( my $k = 1 ; $k < $iterations_required ; $k++ ) {
-        my $lambda_k_dash = (
-            0.5 * (
-                ( $mu_dash * $mu_dash ) / ( $sigma * $sigma ) +
-                  ( $k * $k * $pi * $pi * $sigma * $sigma ) / ( $h * $h )
-            )
-        );
+    for (my $k = 1; $k < $iterations_required; $k++) {
+        my $lambda_k_dash = (0.5 * (($mu_dash * $mu_dash) / ($sigma * $sigma) + ($k * $k * $pi * $pi * $sigma * $sigma) / ($h * $h)));
 
-        my $phi =
-          ( $sigma * $sigma ) /
-          ( $h * $h ) *
-          exp( -$lambda_k_dash * $t ) *
-          $k /
-          $lambda_k_dash;
+        my $phi = ($sigma * $sigma) / ($h * $h) * exp(-$lambda_k_dash * $t) * $k / $lambda_k_dash;
 
-        $series_part += $phi * $pi * sin( $k * $pi * ( $h - $x ) / $h );
+        $series_part += $phi * $pi * sin($k * $pi * ($h - $x) / $h);
 
         #
         # Note that greeks may also call this function, and their
@@ -572,15 +531,14 @@ sub common_function_pelsser_1997 {
         # we will not bother (else the code will get messy), and
         # just use the price stability constant.
         #
-        if ( $k == 1 and ( not( abs($phi) < $stability_constant ) ) ) {
-            die
-              "PELSSER VALUATION formula for S=$S, U=$U, D=$D, t=$t, r_q=$r_q, "
-              . "mu=$mu, vol=$sigma, w=$w, eta=$eta, cannot be evaluated because"
-              . "PELSSER VALUATION stability conditions ($phi less than "
-              . "$stability_constant) not met. This could be due to barriers "
-              . "too big, volatilities too low, interest/dividend rates too high, "
-              . "or machine accuracy too low. Machine accuracy is "
-              . $MACHINE_EPSILON . ".";
+        if ($k == 1 and (not(abs($phi) < $stability_constant))) {
+            die "PELSSER VALUATION formula for S=$S, U=$U, D=$D, t=$t, r_q=$r_q, "
+                . "mu=$mu, vol=$sigma, w=$w, eta=$eta, cannot be evaluated because"
+                . "PELSSER VALUATION stability conditions ($phi less than "
+                . "$stability_constant) not met. This could be due to barriers "
+                . "too big, volatilities too low, interest/dividend rates too high, "
+                . "or machine accuracy too low. Machine accuracy is "
+                . $MACHINE_EPSILON . ".";
         }
     }
 
@@ -605,16 +563,13 @@ sub common_function_pelsser_1997 {
     #
     # Since h > x, we only check for (mu_dash * h) / (vol * vol)
     #
-    if ( abs( $mu_dash * $h / ( $sigma * $sigma ) ) < $SMALL_VALUE_MU ) {
+    if (abs($mu_dash * $h / ($sigma * $sigma)) < $SMALL_VALUE_MU) {
         $hyp_part = $x / $h;
-    }
-    else {
-        $hyp_part =
-          Math::Trig::sinh( $mu_dash * $x / ( $sigma * $sigma ) ) /
-          Math::Trig::sinh( $mu_dash * $h / ( $sigma * $sigma ) );
+    } else {
+        $hyp_part = Math::Trig::sinh($mu_dash * $x / ($sigma * $sigma)) / Math::Trig::sinh($mu_dash * $h / ($sigma * $sigma));
     }
 
-    return ( $hyp_part - $series_part ) * exp( -$r_q * $t * $w );
+    return ($hyp_part - $series_part) * exp(-$r_q * $t * $w);
 }
 
 =head2 get_stability_constant_pelsser_1997
@@ -628,40 +583,32 @@ sub common_function_pelsser_1997 {
 =cut
 
 sub get_stability_constant_pelsser_1997 {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, $eta, $p ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $eta, $p) = @_;
 
     # $eta = 1, onetouch up knockout down
     # $eta = 0, onetouch down knockout up
 
-    if ( not defined $eta ) {
-        die "Wrong usage of this function for S=$S, U=$U, D=$D, t=$t, "
-          . "r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, Eta not defined.";
+    if (not defined $eta) {
+        die "Wrong usage of this function for S=$S, U=$U, D=$D, t=$t, " . "r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, Eta not defined.";
     }
 
     # p is the power of pi
     # p=1 for price/theta/vega/vanna/volga
     # p=2 for delta
     # p=3 for gamma
-    if ( $p != 1 and $p != 2 and $p != 3 ) {
+    if ($p != 1 and $p != 2 and $p != 3) {
         die "Wrong usage of this function for S=$S, U=$U, D=$D, t=$t, "
-          . "r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, Power of PI must "
-          . "be 1, 2 or 3. Given $p.";
+            . "r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, Power of PI must "
+            . "be 1, 2 or 3. Given $p.";
     }
 
-    my $h       = log( $U / $D );
-    my $x       = log( $S / $D );
-    my $mu_new  = $mu - ( 0.5 * $sigma * $sigma );
-    my $mu_dash = sqrt( max( 0,
-        ( $mu_new * $mu_new ) + ( 2 * $sigma * $sigma * $r_q * ( 1 - $w ) ) ) );
+    my $h       = log($U / $D);
+    my $x       = log($S / $D);
+    my $mu_new  = $mu - (0.5 * $sigma * $sigma);
 
-    my $numerator = $MIN_ACCURACY_UPORDOWN_PELSSER_1997 *
-      exp( 1.0 - $mu_new * ( ( $eta * $h ) - $x ) / ( $sigma * $sigma ) );
-    my $denominator =
-      ( exp(1) * ( Math::Trig::pi + $p ) ) +
-      ( max( $mu_new * ( ( $eta * $h ) - $x ), 0.0 ) *
-          Math::Trig::pi /
-          ( $sigma**2 ) );
-    $denominator *= ( Math::Trig::pi**( $p - 1 ) ) * $MACHINE_EPSILON;
+    my $numerator = $MIN_ACCURACY_UPORDOWN_PELSSER_1997 * exp(1.0 - $mu_new * (($eta * $h) - $x) / ($sigma * $sigma));
+    my $denominator = (exp(1) * (Math::Trig::pi + $p)) + (max($mu_new * (($eta * $h) - $x), 0.0) * Math::Trig::pi / ($sigma**2));
+    $denominator *= (Math::Trig::pi**($p - 1)) * $MACHINE_EPSILON;
 
     my $stability_condition = $numerator / $denominator;
 
@@ -681,15 +628,13 @@ sub get_stability_constant_pelsser_1997 {
 =cut
 
 sub ot_up_ko_down_pelsser_1997 {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w) = @_;
 
-    my $mu_new = $mu - ( 0.5 * $sigma * $sigma );
-    my $h      = log( $U / $D );
-    my $x      = log( $S / $D );
+    my $mu_new = $mu - (0.5 * $sigma * $sigma);
+    my $h      = log($U / $D);
+    my $x      = log($S / $D);
 
-    return
-      exp( $mu_new * ( $h - $x ) / ( $sigma * $sigma ) ) *
-      common_function_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, 1 );
+    return exp($mu_new * ($h - $x) / ($sigma * $sigma)) * common_function_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, 1);
 }
 
 =head2 ot_down_ko_up_pelsser_1997
@@ -705,15 +650,12 @@ sub ot_up_ko_down_pelsser_1997 {
 =cut
 
 sub ot_down_ko_up_pelsser_1997 {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w) = @_;
 
-    my $mu_new = $mu - ( 0.5 * $sigma * $sigma );
-    my $h      = log( $U / $D );
-    my $x      = log( $S / $D );
+    my $mu_new = $mu - (0.5 * $sigma * $sigma);
+    my $x      = log($S / $D);
 
-    return
-      exp( -$mu_new * $x / ( $sigma * $sigma ) ) *
-      common_function_pelsser_1997( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, 0 );
+    return exp(-$mu_new * $x / ($sigma * $sigma)) * common_function_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, 0);
 }
 
 =head2 get_min_iterations_pelsser_1997
@@ -728,30 +670,23 @@ sub ot_down_ko_up_pelsser_1997 {
 =cut
 
 sub get_min_iterations_pelsser_1997 {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy) = @_;
 
-    if ( not defined $accuracy ) {
+    if (not defined $accuracy) {
         $accuracy = $MIN_ACCURACY_UPORDOWN_PELSSER_1997;
     }
 
-    if ( $accuracy > $MIN_ACCURACY_UPORDOWN_PELSSER_1997 ) {
+    if ($accuracy > $MIN_ACCURACY_UPORDOWN_PELSSER_1997) {
+        $accuracy = $MIN_ACCURACY_UPORDOWN_PELSSER_1997;
+    } elsif ($accuracy <= 0) {
         $accuracy = $MIN_ACCURACY_UPORDOWN_PELSSER_1997;
     }
-    elsif ( $accuracy <= 0 ) {
-        $accuracy = $MIN_ACCURACY_UPORDOWN_PELSSER_1997;
-    }
 
-    my $h = log( $U / $D );
-    my $x = log( $S / $D );
 
-    my $it_up =
-      _get_min_iterations_ot_up_ko_down_pelsser_1997( $S, $U, $D, $t, $r_q, $mu,
-        $sigma, $w, $accuracy );
-    my $it_down =
-      _get_min_iterations_ot_down_ko_up_pelsser_1997( $S, $U, $D, $t, $r_q, $mu,
-        $sigma, $w, $accuracy );
+    my $it_up = _get_min_iterations_ot_up_ko_down_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy);
+    my $it_down = _get_min_iterations_ot_down_ko_up_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy);
 
-    my $min = max( $it_up, $it_down );
+    my $min = max($it_up, $it_down);
 
     return $min;
 }
@@ -768,7 +703,7 @@ sub get_min_iterations_pelsser_1997 {
 =cut
 
 sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy) = @_;
 
     if (!defined $accuracy) {
         die "accuracy required";
@@ -776,42 +711,36 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
 
     my $pi = Math::Trig::pi;
 
-    my $h       = log( $U / $D );
-    my $x       = log( $S / $D );
-    my $mu_new  = $mu - ( 0.5 * $sigma * $sigma );
-    my $mu_dash = sqrt( max( 0,
-        ( $mu_new * $mu_new ) + ( 2 * $sigma * $sigma * $r_q * ( 1 - $w ) ) ) );
+    my $h       = log($U / $D);
+    my $x       = log($S / $D);
+    my $mu_new  = $mu - (0.5 * $sigma * $sigma);
+    my $mu_dash = sqrt(max(0, ($mu_new * $mu_new) + (2 * $sigma * $sigma * $r_q * (1 - $w))));
 
-    my $A = ( $mu_dash * $mu_dash ) / ( 2 * $sigma * $sigma );
-    my $B = ( $pi * $pi * $sigma * $sigma ) / ( 2 * $h * $h );
+    my $A = ($mu_dash * $mu_dash) / (2 * $sigma * $sigma);
+    my $B = ($pi * $pi * $sigma * $sigma) / (2 * $h * $h);
 
     my $delta_dash = $accuracy;
-    my $delta =
-      $delta_dash *
-      exp( -$mu_new * ( $h - $x ) / ( $sigma * $sigma ) ) *
-      ( ( $h * $h ) / ( $pi * $sigma * $sigma ) );
+    my $delta = $delta_dash * exp(-$mu_new * ($h - $x) / ($sigma * $sigma)) * (($h * $h) / ($pi * $sigma * $sigma));
 
     # This can happen when stability condition fails
-    if ( $delta * $B <= 0 ) {
+    if ($delta * $B <= 0) {
         die "(_get_min_iterations_ot_up_ko_down_pelsser_1997) Cannot "
-          . "evaluate minimum iterations because too many iterations "
-          . "required!! delta=$delta, B=$B for input parameters S=$S, "
-          . "U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, "
-          . "accuracy=$accuracy";
-        return $MAX_ITERATIONS_UPORDOWN_PELSSER_1997;
+            . "evaluate minimum iterations because too many iterations "
+            . "required!! delta=$delta, B=$B for input parameters S=$S, "
+            . "U=$U, D=$D, t=$t, r_q=$r_q, mu=$mu, sigma=$sigma, w=$w, "
+            . "accuracy=$accuracy";
     }
 
     # Check that condition is satisfied
-    my $condition = max( exp( -$A * $t ) / ( $B * $delta ), 1 );
+    my $condition = max(exp(-$A * $t) / ($B * $delta), 1);
 
-    my $k_min = log($condition) / ( $B * $t );
+    my $k_min = log($condition) / ($B * $t);
     $k_min = sqrt($k_min);
 
-    if ( $k_min < $MIN_ITERATIONS_UPORDOWN_PELSSER_1997 ) {
+    if ($k_min < $MIN_ITERATIONS_UPORDOWN_PELSSER_1997) {
 
         return $MIN_ITERATIONS_UPORDOWN_PELSSER_1997;
-    }
-    elsif ( $k_min > $MAX_ITERATIONS_UPORDOWN_PELSSER_1997 ) {
+    } elsif ($k_min > $MAX_ITERATIONS_UPORDOWN_PELSSER_1997) {
 
         return $MAX_ITERATIONS_UPORDOWN_PELSSER_1997;
     }
@@ -830,16 +759,14 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
 =cut
 
 sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy) = @_;
 
-    my $h      = log( $U / $D );
-    my $x      = log( $S / $D );
-    my $mu_new = $mu - ( 0.5 * $sigma * $sigma );
+    my $h      = log($U / $D);
+    my $mu_new = $mu - (0.5 * $sigma * $sigma);
 
-    $accuracy = $accuracy * exp( $mu_new * $h / ( $sigma * $sigma ) );
+    $accuracy = $accuracy * exp($mu_new * $h / ($sigma * $sigma));
 
-    return _get_min_iterations_ot_up_ko_down_pelsser_1997( $S, $U, $D, $t, $r_q,
-        $mu, $sigma, $w, $accuracy );
+    return _get_min_iterations_ot_up_ko_down_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy);
 }
 
 =head2 range
@@ -866,13 +793,12 @@ sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
 sub range {
 
     # payout time $w is only a dummy. range contracts always payout at end.
-    my ( $S, $U, $D, $t, $r_q, $mu, $sigma, $w ) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w) = @_;
 
     # range always pay out at end
     $w = 1;
 
-    return
-      exp( -$r_q * $t ) - upordown( $S, $U, $D, $t, $r_q, $mu, $sigma, $w );
+    return exp(-$r_q * $t) - upordown($S, $U, $D, $t, $r_q, $mu, $sigma, $w);
 }
 
 =head1 DEPENDENCIES
@@ -938,48 +864,6 @@ L<http://cpanratings.perl.org/d/Math-Business-BlackScholes-Binaries>
 L<http://search.cpan.org/dist/Math-Business-BlackScholes-Binaries/>
 
 =back
-
-
-=head1 LICENSE AND COPYRIGHT
-
-Copyright 2014 binary.com.
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of the the Artistic License (2.0). You may obtain a
-copy of the full license at:
-
-L<http://www.perlfoundation.org/artistic_license_2_0>
-
-Any use, modification, and distribution of the Standard or Modified
-Versions is governed by this Artistic License. By using, modifying or
-distributing the Package, you accept this license. Do not use, modify,
-or distribute the Package, if you do not accept this license.
-
-If your Modified Version has been derived from a Modified Version made
-by someone other than you, you are nevertheless required to ensure that
-your Modified Version complies with the requirements of this license.
-
-This license does not grant you the right to use any trademark, service
-mark, tradename, or logo of the Copyright Holder.
-
-This license includes the non-exclusive, worldwide, free-of-charge
-patent license to make, have made, use, offer to sell, sell, import and
-otherwise transfer the Package with respect to any patent claims
-licensable by the Copyright Holder that are necessarily infringed by the
-Package. If you institute patent litigation (including a cross-claim or
-counterclaim) against any party alleging that the Package constitutes
-direct or contributory patent infringement, then this Artistic License
-to you shall terminate on the date that such litigation is filed.
-
-Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
-AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
-THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
-YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
-CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
-CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 
 =cut
 
