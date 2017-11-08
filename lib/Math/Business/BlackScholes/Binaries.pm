@@ -837,14 +837,14 @@ sub box_option{
     my $rho = sqrt($B_ref_time / ($B_ref_time + $width)); #correlation between asset price at start & end time of the box
 
     return  pnorm($a1) - pnorm($b1) + #probability of touching the left-edge of the box
-    
-            pnorm($a2) - bivnor($a2, $a1, $rho) + #probability of touching the upper part of the box
-            exp(2 * $drift * $upper_left / ($sg * $sg)) * ( 
-                pnorm($a3) - bivnor($a3, $a1, $rho)) + 
+             
+            pnorm(-$a1) - bivnor($a2, $a1, $rho) + #probability of touching the upper part of the box
+                exp(2 * $drift * $upper_left / ($sg * $sg)) * ( 
+                    pnorm(- $a1) - bivnor($a3, $a1, $rho)) + 
                 
-            pnorm($b1) - bivnor($b2,$b1,$rho) + #probability of touching the lower part of the box
-            exp(2* $drift * $bottom_left / ($sg * $sg)) * ( 
-                pnorm($b1) - bivnor($b3, $a1, $rho)); 
+            pnorm(-$b2) - bivnor($b2,$b1,$rho) + #probability of touching the lower part of the box
+                exp(2* $drift * $bottom_left / ($sg * $sg)) * ( 
+                    pnorm(-$b3) - bivnor($b3, $b1, $rho)); 
 }
 
 =head1 DEPENDENCIES
