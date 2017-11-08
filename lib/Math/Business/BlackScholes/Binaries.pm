@@ -9,6 +9,7 @@ my $SMALLTIME = 1 / (60 * 60 * 24 * 365);    # 1 second in years;
 use List::Util qw(max);
 use Math::CDF qw(pnorm);
 use Math::Trig;
+use Math::BivariateCDF qw(bivnor);
 use Machine::Epsilon;
 
 # ABSTRACT: Algorithm of Math::Business::BlackScholes::Binaries
@@ -801,10 +802,50 @@ sub range {
     return exp(-$r_q * $t) - upordown($S, $U, $D, $t, $r_q, $mu, $sigma, $w);
 }
 
+=head2 box_option
+
+    USAGE
+    my $price = box_option($S, $B_ref_spot, $B_ref_time, $height, $width, $mu, $sg)
+
+    PARAMS
+    $S asset price
+    $B_ref_spot asset price reference of the upper-left corner of the box (y-coordinate)
+    $B_ref_time start time of the box - time reference of the upper-left corner of the box (x-coordinate)
+    $height height of the box (in terms of spot price)
+    $width width of the box (in terms of time in years)
+    $mu drift adjustment (0.05 = 5%)
+    $sg volatility (0.3 = 30%)
+
+    DESCRIPTION
+    Price a box option contract.
+
+=cut
+
+sub box_option{
+    my ($S, $B_ref_spot, $B_ref_time, $height, $width, $mu, $sg) = @_;
+  
+    my $a1 = (log($B_ref_spot/$S)-($mu - $sg * $sg/2)*$B_ref_time)/(sqrt($B_ref_time)*$sg);
+    my $a2 = (log($B_ref_spot/$S)-($mu - $sg * $sg/2)*($B_ref_time+$width))/(sqrt($B_ref_time+$width)*$sg);
+    my $a3 = (log($B_ref_spot/$S)-($mu - $sg * $sg/2)*($B_ref_time-$width))/(sqrt($B_ref_time+$width)*$sg);
+    my $b1 = (log(($B_ref_spot-$height)/$S)-($mu - $sg * $sg/2)*$B_ref_time)/(sqrt($B_ref_time)*$sg);
+    my $b2 = (log(($B_ref_spot-$height)/$S)-($mu - $sg * $sg/2)*($B_ref_time+$width))/(sqrt($B_ref_time+$width)*$sg);
+    my $b3 = (log(($B_ref_spot-$height)/$S)-($mu - $sg * $sg/2)*($B_ref_time-$width))/(sqrt($B_ref_time+$width)*$sg);
+    my $rho = sqrt($B_ref_time/($B_ref_time+$width));
+
+    return  pnorm($a1) - pnorm($b1) + 
+            pnorm($a2) - bivnor($a2,$a1,$rho) +
+            pnorm($b1) - bivnor($b2,$b1,$rho) +
+            exp(2*($mu-$sg*$sg/2)*log($B_ref_spot/$S)/($sg*$sg))*( 
+                pnorm($a3) - bivnor($a3,$a1,$rho)) +
+            exp(2*($mu-$sg*$sg/2)*log(($B_ref_spot-$height)/$S)/($sg*$sg))*( 
+                pnorm($b1) - bivnor($b3,$a1,$rho));
+}
+
 =head1 DEPENDENCIES
 
     * Math::CDF
     * Machine::Epsilon
+    * Math::BivariateCDF
 
 =head1 SOURCE CODE
 
