@@ -2,7 +2,7 @@ package Math::Business::BlackScholes::Binaries;
 use strict;
 use warnings;
 
-our $VERSION = '1.22';
+our $VERSION = '1.23';
 
 my $SMALLTIME = 1 / (60 * 60 * 24 * 365);    # 1 second in years;
 
