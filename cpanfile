@@ -1,5 +1,6 @@
 requires 'Machine::Epsilon';
 requires 'Math::CDF';
+requires 'Math::BivariateCDF';
 requires 'perl', '5.006';
 
 on configure => sub {
