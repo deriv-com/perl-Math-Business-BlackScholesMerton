@@ -844,7 +844,7 @@ sub box_option{
                 
             pnorm(-$b2) - bivnor($b2,$b1,$rho) + #probability of touching the lower part of the box
                 exp(2* $drift * $bottom_left / ($sg * $sg)) * ( 
-                    pnorm(-$b3) - bivnor($b3, $b1, $rho)); 
+                    pnorm(- $b3) - bivnor($b3, $b1, $rho)); 
 }
 
 =head1 DEPENDENCIES
