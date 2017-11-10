@@ -9,6 +9,7 @@ my $SMALLTIME = 1 / (60 * 60 * 24 * 365);    # 1 second in years;
 use List::Util qw(max);
 use Math::CDF qw(pnorm);
 use Math::Trig;
+use Math::BivariateCDF qw(bivnor);
 use Machine::Epsilon;
 
 # ABSTRACT: Algorithm of Math::Business::BlackScholes::Binaries
@@ -801,10 +802,56 @@ sub range {
     return exp(-$r_q * $t) - upordown($S, $U, $D, $t, $r_q, $mu, $sigma, $w);
 }
 
+=head2 box_option
+
+    USAGE
+    my $price = box_option($S, $B_ref_spot, $B_ref_time, $height, $width, $mu, $sg)
+
+    PARAMS
+    $S asset price
+    $B_ref_spot asset price reference of the upper-left corner of the box (y-coordinate)
+    $B_ref_time start time of the box - time reference of the upper-left corner of the box (x-coordinate)
+    $height height of the box - distance between upper and lower part of the box (in terms of asset price)
+    $width width of the box - distance between left and right edge of the box (in terms of time in years)
+    $mu drift adjustment (0.05 = 5%)
+    $sg volatility (0.3 = 30%)
+
+    DESCRIPTION
+    Price a box option contract.
+
+=cut
+
+sub box_option{
+    my ($S, $B_ref_spot, $B_ref_time, $height, $width, $mu, $sg) = @_;
+    
+    my $upper_left = log($B_ref_spot / $S); # relative position (y-axis) of the upper-left corner of the box from current spot price
+    my $bottom_left = log(($B_ref_spot - $height) / $S); # relative position (y-axis) of the bottom-left corner of the box from current spot price
+    my $drift = ($mu - $sg * $sg / 2); # common drift rate
+  
+    my $a1 = ($upper_left - $drift * $B_ref_time) / (sqrt($B_ref_time)*$sg);
+    my $a2 = ($upper_left - $drift * ($B_ref_time + $width)) / (sqrt($B_ref_time + $width) * $sg);
+    my $a3 = ($upper_left - $drift * ($B_ref_time - $width)) / (sqrt($B_ref_time + $width) * $sg);
+    my $b1 = ($bottom_left - $drift * $B_ref_time) / (sqrt($B_ref_time) * $sg);
+    my $b2 = ($bottom_left - $drift * ($B_ref_time + $width)) / (sqrt($B_ref_time + $width) * $sg);
+    my $b3 = ($bottom_left - $drift * ($B_ref_time - $width)) / (sqrt($B_ref_time + $width) * $sg);
+    my $rho = sqrt($B_ref_time / ($B_ref_time + $width)); #correlation between asset price at start & end time of the box
+
+    return  pnorm($a1) - pnorm($b1) + #probability of touching the left-edge of the box
+             
+            pnorm(-$a1) - bivnor($a2, $a1, $rho) + #probability of touching the upper part of the box
+                exp(2 * $drift * $upper_left / ($sg * $sg)) * ( 
+                    pnorm(- $a1) - bivnor($a3, $a1, $rho)) + 
+                
+            pnorm(-$b2) - bivnor($b2,$b1,$rho) + #probability of touching the lower part of the box
+                exp(2* $drift * $bottom_left / ($sg * $sg)) * ( 
+                    pnorm(- $b3) - bivnor($b3, $b1, $rho)); 
+}
+
 =head1 DEPENDENCIES
 
     * Math::CDF
     * Machine::Epsilon
+    * Math::BivariateCDF
 
 =head1 SOURCE CODE
 
