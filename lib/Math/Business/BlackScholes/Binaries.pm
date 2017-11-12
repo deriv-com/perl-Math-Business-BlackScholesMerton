@@ -802,10 +802,10 @@ sub range {
     return exp(-$r_q * $t) - upordown($S, $U, $D, $t, $r_q, $mu, $sigma, $w);
 }
 
-=head2 box_option
+=head2 box
 
     USAGE
-    my $price = box_option($S, $B_ref_spot, $B_ref_time, $height, $width, $mu, $sg)
+    my $price = box($S, $B_ref_spot, $B_ref_time, $height, $width, $mu, $sg)
 
     PARAMS
     $S asset price
@@ -817,11 +817,11 @@ sub range {
     $sg volatility (0.3 = 30%)
 
     DESCRIPTION
-    Price a box option contract.
+    Price a box contract.
 
 =cut
 
-sub box_option{
+sub box{
     my ($S, $B_ref_spot, $B_ref_time, $height, $width, $mu, $sg) = @_;
     
     my $upper_left = log($B_ref_spot / $S); # relative position (y-axis) of the upper-left corner of the box from current spot price
