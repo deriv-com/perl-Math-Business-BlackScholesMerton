@@ -1,3 +1,4 @@
+
 package Math::Business::BlackScholes::Binaries;
 use strict;
 use warnings;
@@ -317,6 +318,8 @@ sub notouch {
 
     return exp(-$r_q * $t) - onetouch($S, $U, $t, $r_q, $mu, $sigma, $w);
 }
+
+
 
 # These variables require 'our' only because they need to be
 # accessed by a test script.
