@@ -331,10 +331,10 @@ sub notouch {
     return exp(-$r_q * $t) - onetouch($S, $U, $t, $r_q, $mu, $sigma, $w);
 }
 
-=head2 reset_call
+=head2 resetcall
 
  USAGE
-    my $price = reset_call($S, $K, $T, $t, $r_q, $mu, $sigma)
+    my $price = resetcall($S, $K, $T, $t, $r_q, $mu, $sigma)
 
     PARAMS
     $S => stock price
@@ -350,7 +350,7 @@ sub notouch {
 
 =cut
 
-sub reset_call {
+sub resetcall {
 
     my ($S, $K, $T, $t, $r_q, $mu, $sigma) = @_;
 
@@ -368,10 +368,10 @@ sub reset_call {
     return (exp((-1 * $r_q) * $T) * pnorm(-1 * $a1) * pnorm($c2) + bivariate($a2, $b2, $rho));
 }
 
-=head2 reset_put
+=head2 resetput
 
  USAGE
-    my $price = reset_put($S, $K, $T, $t, $r_q, $mu, $sigma)
+    my $price = resetput($S, $K, $T, $t, $r_q, $mu, $sigma)
 
     PARAMS
     $S => stock price
@@ -387,7 +387,7 @@ sub reset_call {
 
 =cut
 
-sub reset_put {
+sub resetput {
 
     my ($S, $K, $T, $t, $r_q, $mu, $sigma) = @_;
 
