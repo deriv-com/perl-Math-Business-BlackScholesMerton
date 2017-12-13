@@ -8,6 +8,7 @@ my $SMALLTIME = 1 / (60 * 60 * 24 * 365);    # 1 second in years;
 
 use List::Util qw(max);
 use Math::CDF qw(pnorm);
+use Math::BivariateCDF;
 use Math::Trig;
 use Machine::Epsilon;
 
@@ -179,6 +180,18 @@ sub d2 {
     return (log($S / $K) + ($mu - $sigma * $sigma / 2.0) * $t) / ($sigma * sqrt($t));
 }
 
+=head2 bivariate
+
+Changes the bivariate value from the upper right tail to lower left tail.
+
+=cut
+
+sub bivariate {
+    my ($a, $b, $rho) = @_;
+
+    return (pnorm($a) - ((1 - pnorm($b)) - Math::BivariateCDF::bivnor($a, $b, $rho)));
+}
+
 =head2 expirymiss
 
     USAGE
@@ -316,6 +329,80 @@ sub notouch {
     my $w = 1;
 
     return exp(-$r_q * $t) - onetouch($S, $U, $t, $r_q, $mu, $sigma, $w);
+}
+
+=head2 resetcall
+
+ USAGE
+    my $price = resetcall($S, $K, $T, $t, $r_q, $mu, $sigma)
+
+    PARAMS
+    $S => stock price
+    $K => barrier
+    $t => reset time (1 = 1 year)
+    $T => expiry time (1 = 1 year)
+    $r_q => payout currency interest rate (0.05 = 5%)
+    $mu => quanto drift adjustment (0.05 = 5%)
+    $sigma => volatility (0.3 = 30%)
+
+    DESCRIPTION
+    Price a binary Reset Strike call option
+
+=cut
+
+sub resetcall {
+
+    my ($S, $K, $T, $t, $r_q, $mu, $sigma) = @_;
+
+    my $a1 = (($mu - $r_q - ($sigma * $sigma) / 2.0) * $t) / ($sigma * sqrt($t));
+    my $a2 = $a1 + ($sigma * sqrt($t));
+
+    my $b1 = (($mu - $r_q - ($sigma * $sigma) / 2.0) * $T) / ($sigma * sqrt($T));
+    my $b2 = $b1 + ($sigma * sqrt($T));
+
+    my $c1 = (($mu - $r_q - ($sigma * $sigma) / 2.0) * ($T - $t)) / ($sigma * sqrt($T - $t));
+    my $c2 = $c1 + ($sigma * sqrt($T - $t));
+
+    my $rho = sqrt($t / $T);
+
+    return (exp((-1 * $r_q) * $T) * pnorm(-1 * $a1) * pnorm($c2) + bivariate($a2, $b2, $rho));
+}
+
+=head2 resetput
+
+ USAGE
+    my $price = resetput($S, $K, $T, $t, $r_q, $mu, $sigma)
+
+    PARAMS
+    $S => stock price
+    $K => barrier
+    $t => reset time (1 = 1 year)
+    $T => expiry time (1 = 1 year)
+    $r_q => payout currency interest rate (0.05 = 5%)
+    $mu => quanto drift adjustment (0.05 = 5%)
+    $sigma => volatility (0.3 = 30%)
+
+    DESCRIPTION
+    Price a binary Reset Strike put option
+
+=cut
+
+sub resetput {
+
+    my ($S, $K, $T, $t, $r_q, $mu, $sigma) = @_;
+
+    my $a1 = (($mu - $r_q + $sigma * $sigma / 2.0) * $t) / ($sigma * sqrt($t));
+    my $a2 = $a1 - ($sigma * sqrt($t));
+
+    my $b1 = (($mu - $r_q + $sigma * $sigma / 2.0) * $T) / ($sigma * sqrt($T));
+    my $b2 = $b1 - ($sigma * sqrt($T));
+
+    my $c1 = (($mu - $r_q + $sigma * $sigma / 2.0) * ($T - $t)) / ($sigma * sqrt($T - $t));
+    my $c2 = $c1 - ($sigma * sqrt($T - $t));
+
+    my $rho = sqrt($t / $T);
+
+    return (exp((-1 * $r_q) * $T) * pnorm($a1) * pnorm(-1 * $c2) + bivariate(-1 * $a2, -1 * $b2, $rho));
 }
 
 # These variables require 'our' only because they need to be
@@ -602,9 +689,9 @@ sub get_stability_constant_pelsser_1997 {
             . "be 1, 2 or 3. Given $p.";
     }
 
-    my $h       = log($U / $D);
-    my $x       = log($S / $D);
-    my $mu_new  = $mu - (0.5 * $sigma * $sigma);
+    my $h      = log($U / $D);
+    my $x      = log($S / $D);
+    my $mu_new = $mu - (0.5 * $sigma * $sigma);
 
     my $numerator = $MIN_ACCURACY_UPORDOWN_PELSSER_1997 * exp(1.0 - $mu_new * (($eta * $h) - $x) / ($sigma * $sigma));
     my $denominator = (exp(1) * (Math::Trig::pi + $p)) + (max($mu_new * (($eta * $h) - $x), 0.0) * Math::Trig::pi / ($sigma**2));
@@ -653,7 +740,7 @@ sub ot_down_ko_up_pelsser_1997 {
     my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w) = @_;
 
     my $mu_new = $mu - (0.5 * $sigma * $sigma);
-    my $x      = log($S / $D);
+    my $x = log($S / $D);
 
     return exp(-$mu_new * $x / ($sigma * $sigma)) * common_function_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, 0);
 }
@@ -681,7 +768,6 @@ sub get_min_iterations_pelsser_1997 {
     } elsif ($accuracy <= 0) {
         $accuracy = $MIN_ACCURACY_UPORDOWN_PELSSER_1997;
     }
-
 
     my $it_up = _get_min_iterations_ot_up_ko_down_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy);
     my $it_down = _get_min_iterations_ot_down_ko_up_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy);
@@ -761,7 +847,7 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
 sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
     my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy) = @_;
 
-    my $h      = log($U / $D);
+    my $h = log($U / $D);
     my $mu_new = $mu - (0.5 * $sigma * $sigma);
 
     $accuracy = $accuracy * exp($mu_new * $h / ($sigma * $sigma));

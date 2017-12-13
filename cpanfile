@@ -1,5 +1,6 @@
 requires 'Machine::Epsilon';
 requires 'Math::CDF';
+requires 'Math::BivariateCDF';
 requires 'perl', '5.006';
 
 on configure => sub {
@@ -10,4 +11,5 @@ on test => sub {
     requires 'Test::Exception';
     requires 'Test::More';
     requires 'Test::Most';
+    requires 'Test::NoWarnings';
 };
