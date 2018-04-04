@@ -10,4 +10,5 @@ on test => sub {
     requires 'Test::Exception';
     requires 'Test::More';
     requires 'Test::Most';
+    requires 'Test::NoWarnings';
 };
