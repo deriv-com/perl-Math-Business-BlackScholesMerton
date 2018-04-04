@@ -23,7 +23,8 @@ Math::Business::BlackScholes::Spreads
         (7/365),    # time
         0.002,      # payout currency interest rate (0.05 = 5%)
         0.001,      # quanto drift adjustment (0.05 = 5%)
-        0.11,       # volatility (0.3 = 30%)
+        0.11,       # volatility for high barrier (0.3 = 30%)
+        0.12,       # volatility for low barrier (0.3 = 30%)
     );
 
 =cut
@@ -39,16 +40,16 @@ Math::Business::BlackScholes::Spreads
 =cut
 
 sub callspread {
-    my ($S, $U, $D, $t, $r_q, $mu, $sigma) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigmaU, $sigmaD) = @_;
 
-    return Math::Business::BlackScholes::Vanillas::vanilla_call($S, $D, $t, $r_q, $mu, $sigma) -
-        Math::Business::BlackScholes::Vanillas::vanilla_call($S, $U, $t, $r_q, $mu, $sigma);
+    return Math::Business::BlackScholes::Vanillas::vanilla_call($S, $D, $t, $r_q, $mu, $sigmaD) -
+        Math::Business::BlackScholes::Vanillas::vanilla_call($S, $U, $t, $r_q, $mu, $sigmaU);
 }
 
 =head2 putspread
 
     USAGE
-    my $price = putspread($S, $U, $D, $t, $r_q, $mu, $sigma);
+    my $price = putspread($S, $U, $D, $t, $r_q, $mu, $sigmaU, $sigmaD);
 
     DESCRIPTION
     Price of a PUT SPREAD
@@ -58,8 +59,8 @@ sub callspread {
 sub putspread {
     my ($S, $U, $D, $t, $r_q, $mu, $sigma) = @_;
 
-    return Math::Business::BlackScholes::Vanillas::vanilla_put($S, $U, $t, $r_q, $mu, $sigma) -
-        Math::Business::BlackScholes::Vanillas::vanilla_put($S, $D, $t, $r_q, $mu, $sigma);
+    return Math::Business::BlackScholes::Vanillas::vanilla_put($S, $U, $t, $r_q, $mu, $sigmaU) -
+        Math::Business::BlackScholes::Vanillas::vanilla_put($S, $D, $t, $r_q, $mu, $sigmaD);
 }
 
 1;
