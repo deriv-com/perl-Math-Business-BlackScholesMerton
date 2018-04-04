@@ -1,41 +1,29 @@
-package Math::Business::BlackScholes::NonBinaries;
+package Math::Business::BlackScholes::Vanillas;
 
 use strict;
 use warnings;
 
 use Math::CDF qw(pnorm);
 
-=head2 callspread
+=head1 NAME
 
-    USAGE
-    my $price = callspread($S, $U, $D, $t, $r_q, $mu, $sigma);
+Math::Business::BlackScholes::Vanillas
 
-    DESCRIPTION
-    Price of a CALL SPREAD
+=head1 SYNOPSIS
 
-=cut
+    use Math::Business::BlackScholes::Vanillas;
 
-sub callspread {
-    my ($S, $U, $D, $t, $r_q, $mu, $sigma) = @_;
-
-    return vanilla_call($S, $D, $t, $r_q, $mu, $sigma) - vanilla_call($S, $U, $t, $r_q, $mu, $sigma);
-}
-
-=head2 putspread
-
-    USAGE
-    my $price = putspread($S, $U, $D, $t, $r_q, $mu, $sigma);
-
-    DESCRIPTION
-    Price of a PUT SPREAD
+    # price of a Call spread option
+    my $price_call_option = Math::Business::BlackScholes::Vanillas::vanilla_call(
+        1.35,       # stock price
+        1.34,       # barrier
+        (7/365),    # time
+        0.002,      # payout currency interest rate (0.05 = 5%)
+        0.001,      # quanto drift adjustment (0.05 = 5%)
+        0.11,       # volatility (0.3 = 30%)
+    );
 
 =cut
-
-sub putspread {
-    my ($S, $U, $D, $t, $r_q, $mu, $sigma) = @_;
-
-    return vanilla_put($S, $U, $t, $r_q, $mu, $sigma) - vanilla_put($S, $D, $t, $r_q, $mu, $sigma);
-}
 
 =head2 vanilla_call
 
