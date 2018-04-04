@@ -5,6 +5,8 @@ use warnings;
 
 use Math::Business::BlackScholes::Vanillas;
 
+## VERSION
+
 =head1 NAME
 
 Math::Business::BlackScholes::Spreads

@@ -2,8 +2,8 @@ package Math::Business::BlackScholes::Binaries;
 use strict;
 use warnings;
 
-our $VERSION = '1.22';
-
+## VERSION
+#
 my $SMALLTIME = 1 / (60 * 60 * 24 * 365);    # 1 second in years;
 
 use List::Util qw(max);

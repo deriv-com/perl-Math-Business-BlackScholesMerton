@@ -5,6 +5,8 @@ use warnings;
 
 use Math::CDF qw(pnorm);
 
+## VERSION
+
 =head1 NAME
 
 Math::Business::BlackScholes::Vanillas
