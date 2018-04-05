@@ -4,6 +4,7 @@ use lib qw{ lib t/lib };
 use Test::More tests => 25;
 use Test::NoWarnings;
 use Math::Business::BlackScholes::Binaries;
+use Math::Business::BlackScholes::Vanillas;
 use Roundnear;
 
 my $S     = 1.35;
@@ -16,20 +17,7 @@ my $q     = 0.001;
 # except EXPIRYMISS and UPORDOWN which are computed as opposing
 # EXPIRYRANGE and RANGE respectively.
 
-my @test_cases = (
-    {
-        type     => 'call',
-        barriers => [1.36],
-        foreign  => 0.3172,
-        domestic => 0.3118,
-    },
-    {
-        type     => 'put',
-        barriers => [1.34],
-        foreign  => 0.3096,
-        domestic => 0.315,
-    },
-    {
+my @vanillas = ({
         type     => 'vanilla_call',
         barriers => [1.34],
         foreign  => 0.0140,
@@ -40,6 +28,19 @@ my @test_cases = (
         barriers => [1.34],
         foreign  => 0.0040,
         domestic => 0.0040,
+    },
+);
+my @binaries = ({
+        type     => 'call',
+        barriers => [1.36],
+        foreign  => 0.3172,
+        domestic => 0.3118,
+    },
+    {
+        type     => 'put',
+        barriers => [1.34],
+        foreign  => 0.3096,
+        domestic => 0.315,
     },
     {
         type     => 'onetouch',
@@ -55,62 +56,56 @@ my @test_cases = (
     },
     {
         type     => 'expiryrange',
-        barriers => [ 1.36, 1.34 ],
+        barriers => [1.36, 1.34],
         foreign  => 0.3732,
         domestic => 0.3732,
     },
     {
         type     => 'expirymiss',
-        barriers => [ 1.36, 1.34 ],
+        barriers => [1.36, 1.34],
         foreign  => 0.6268,
         domestic => 0.6268,
     },
     {
         type     => 'range',
-        barriers => [ 1.36, 1.34 ],
+        barriers => [1.36, 1.34],
         foreign  => 0.006902,
         domestic => 0.006902,
     },
     {
         type     => 'upordown',
-        barriers => [ 1.36, 1.34 ],
+        barriers => [1.36, 1.34],
         foreign  => 0.993093,
         domestic => 0.993088,
     },
     {
         type     => 'range',
-        barriers => [ 1.35, 1.34 ],
+        barriers => [1.35, 1.34],
         foreign  => 0,
         domestic => 0,
     },
     {
         type     => 'upordown',
-        barriers => [ 1.36, 1.35 ],
+        barriers => [1.36, 1.35],
         foreign  => 1,
         domestic => 1,
     },
 
 );
 
-foreach my $test_case (@test_cases) {
-    my $formula_name = 'Math::Business::BlackScholes::Binaries::'
-      . $test_case->{type};
-    my %probs = (
-        domestic => &$formula_name(
-            $S, @{ $test_case->{barriers} },
-            $t, $r, $r - $q, $sigma
-        ),
-        foreign => &$formula_name(
-            $S, @{ $test_case->{barriers} },
-            $t, $q, $r - $q + $sigma**2, $sigma
-        ),
-    );
+foreach my $test_group (['Math::Business::BlackScholes::Binaries::', \@binaries], ['Math::Business::BlackScholes::Vanillas::', \@vanillas]) {
+    foreach my $test_case (@{$test_group->[1]}) {
+        my $formula_name = $test_group->[0] . $test_case->{type};
+        my %probs        = (
+            domestic => &$formula_name($S, @{$test_case->{barriers}}, $t, $r, $r - $q,             $sigma),
+            foreign  => &$formula_name($S, @{$test_case->{barriers}}, $t, $q, $r - $q + $sigma**2, $sigma),
+        );
 
-    foreach my $curr ( sort keys %probs ) {
-        my $length = length( $test_case->{$curr} );
-        my $precision = ( $length < 2 ) ? 1 : 10**( -1 * ( $length - 2 ) );
-        is( roundnear( $precision, $probs{$curr} ),
-            $test_case->{$curr}, $test_case->{type} . ' ' . $curr );
+        foreach my $curr (sort keys %probs) {
+            my $length = length($test_case->{$curr});
+            my $precision = ($length < 2) ? 1 : 10**(-1 * ($length - 2));
+            is(roundnear($precision, $probs{$curr}), $test_case->{$curr}, $test_case->{type} . ' ' . $curr);
+        }
     }
 }
 
