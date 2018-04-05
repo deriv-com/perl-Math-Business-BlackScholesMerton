@@ -25,12 +25,16 @@ Math::Business::BlackScholes::NonBinaries
         0.11,       # volatility (0.3 = 30%)
     );
 
+=head1 DESCRIPTION
+
+Contains non-binary option pricing formula.
+
 =cut
 
 =head2 vanilla_call
 
     USAGE
-    my $price = vanilla_call($S, $K, $t, $r_q, $mu, $sigma)
+    my $price = vanilla_call($S, $K, $t, $r_q, $mu, $sigma);
 
     DESCRIPTION
     Price of a Vanilla Call
