@@ -57,7 +57,7 @@ sub callspread {
 =cut
 
 sub putspread {
-    my ($S, $U, $D, $t, $r_q, $mu, $sigma) = @_;
+    my ($S, $U, $D, $t, $r_q, $mu, $sigmaU, $sigmaD) = @_;
 
     return Math::Business::BlackScholes::Vanillas::vanilla_put($S, $U, $t, $r_q, $mu, $sigmaU) -
         Math::Business::BlackScholes::Vanillas::vanilla_put($S, $D, $t, $r_q, $mu, $sigmaD);
