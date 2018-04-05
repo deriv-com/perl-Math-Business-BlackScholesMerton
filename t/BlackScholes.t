@@ -4,7 +4,7 @@ use lib qw{ lib t/lib };
 use Test::More tests => 25;
 use Test::NoWarnings;
 use Math::Business::BlackScholes::Binaries;
-use Math::Business::BlackScholes::Vanillas;
+use Math::Business::BlackScholes::NonBinaries;
 use Roundnear;
 
 my $S     = 1.35;
@@ -93,7 +93,7 @@ my @binaries = ({
 
 );
 
-foreach my $test_group (['Math::Business::BlackScholes::Binaries::', \@binaries], ['Math::Business::BlackScholes::Vanillas::', \@vanillas]) {
+foreach my $test_group (['Math::Business::BlackScholes::Binaries::', \@binaries], ['Math::Business::BlackScholes::NonBinaries::', \@vanillas]) {
     foreach my $test_case (@{$test_group->[1]}) {
         my $formula_name = $test_group->[0] . $test_case->{type};
         my %probs        = (
