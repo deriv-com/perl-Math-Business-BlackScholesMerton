@@ -195,7 +195,7 @@ sub _d1_function {
 
 =head2 _l_max
 
-This is a common function use to calculate the lookbacks options price. See [1] for details.
+This is a common function use to calculate the lookbacks options price. See [5] for details.
 
 =cut
 
@@ -220,7 +220,7 @@ sub _l_max {
 
 =head2 _l_min
 
-This is a common function use to calculate the lookbacks options price. See [1] for details.
+This is a common function use to calculate the lookbacks options price. See [5] for details.
 
 =cut
 
