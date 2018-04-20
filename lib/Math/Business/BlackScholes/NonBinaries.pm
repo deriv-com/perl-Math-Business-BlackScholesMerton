@@ -69,4 +69,178 @@ sub vanilla_put {
     return -1 * exp(-$r_q * $t) * ($S * exp($mu * $t) * pnorm(-$d1) - $K * pnorm(-$d2));
 }
 
+=head2 lbfloatcall
+
+    USAGE
+    my $price = lbfloatcall($S, $K, $t, $r_q, $mu, $sigma, $S_max, $S_min)
+
+    DESCRIPTION
+    Price of a Lookback Float Call
+
+=cut
+
+sub lbfloatcall {
+    my ($S, $K, $t, $r_q, $mu, $sigma, $S_max, $S_min) = @_;
+
+    $S_max = undef;
+    my $d1 = _d1_function($S, $S_min, $t, $r_q, $mu, $sigma);
+    my $d2 = $d1 - ($sigma * sqrt($t));
+
+    my $value = exp(-$r_q * $t) * ($S * exp($mu * $t) * pnorm($d1) - $S_min * pnorm($d2) + _l_min($S, $S_min, $t, $r_q, $mu, $sigma));
+
+    return $value;
+}
+
+=head2 lbfloatput
+
+    USAGE
+    my $price = lbfloatcall($S, $K, $t, $r_q, $mu, $sigma, $S_max, $S_min)
+
+    DESCRIPTION
+    Price of a Lookback Float Put
+
+=cut
+
+sub lbfloatput {    # Floating Strike Put
+    my ($S, $K, $t, $r_q, $mu, $sigma, $S_max, $S_min) = @_;
+
+    $S_min = undef;
+    my $d1 = _d1_function($S, $S_max, $t, $r_q, $mu, $sigma);
+    my $d2 = $d1 - ($sigma * sqrt($t));
+
+    my $value = exp(-$r_q * $t) * ($S_max * pnorm(-$d2) - $S * exp($mu * $t) * pnorm(-$d1) + _l_max($S, $S_max, $t, $r_q, $mu, $sigma));
+
+    return $value;
+}
+
+=head2 lbfixedcall
+
+    USAGE
+    my $price = lbfixedcall($S, $K, $t, $r_q, $mu, $sigma, $S_max, $S_min)
+
+    DESCRIPTION
+    Price of a Lookback Fixed Call
+
+=cut
+
+sub lbfixedcall {
+    my ($S, $K, $t, $r_q, $mu, $sigma, $S_max, $S_min) = @_;
+
+    $S_min = undef;
+    my $K_max = max($S_max, $K);
+    my $d1 = _d1_function($S, $K_max, $t, $r_q, $mu, $sigma);
+    my $d2 = $d1 - ($sigma * sqrt($t));
+
+    my $value =
+        exp(-$r_q * $t) * (max($S_max - $K, 0.0) + $S * exp($mu * $t) * pnorm($d1) - $K_max * pnorm($d2) + _l_max($S, $K_max, $t, $r_q, $mu, $sigma));
+
+    return $value;
+}
+
+=head2 lbfixedput
+
+    USAGE
+    my $price = lbfixedput($S, $K, $t, $r_q, $mu, $sigma, $S_max, $S_min)
+
+    DESCRIPTION
+    Price of a Lookback Fixed Put
+
+=cut
+
+sub lbfixedput {
+    my ($S, $K, $t, $r_q, $mu, $sigma, $S_max, $S_min) = @_;
+
+    $S_max = undef;
+    my $K_min = min($S_min, $K);
+    my $d1 = _d1_function($S, $K_min, $t, $r_q, $mu, $sigma);
+    my $d2 = $d1 - ($sigma * sqrt($t));
+
+    my $value = exp(-$r_q * $t) *
+        (max($K - $S_min, 0.0) + $K_min * pnorm(-$d2) - $S * exp($mu * $t) * pnorm(-$d1) + _l_min($S, $K_min, $t, $r_q, $mu, $sigma));
+
+    return $value;
+}
+
+=head2 lbhighlow
+
+    USAGE
+    my $price = lbhighlow($S, $K, $t, $r_q, $mu, $sigma, $S_max, $S_min)
+
+    DESCRIPTION
+    Price of a Lookback High Low
+
+=cut
+
+sub lbhighlow {
+    my ($S, $K, $t, $r_q, $mu, $sigma, $S_max, $S_min) = @_;
+
+    my $value = lbfloatcall($S, $S_min, $t, $r_q, $mu, $sigma, $S_max, $S_min) + lbfloatput($S, $S_max, $t, $r_q, $mu, $sigma, $S_max, $S_min);
+
+    return $value;
+}
+
+=head2 _d1_function
+
+returns the d1 term common to many BlackScholes formulae.
+
+=cut
+
+sub _d1_function {
+    my ($S, $K, $t, $r_q, $mu, $sigma) = @_;
+
+    my $value = (log($S / $K) + ($mu + $sigma * $sigma * 0.5) * $t) / ($sigma * sqrt($t));
+
+    return $value;
+}
+
+=head2 _l_max
+
+This is a common function use to calculate the lookbacks options price. See [1] for details.
+
+=cut
+
+sub _l_max {
+    my ($S, $K, $t, $r_q, $mu, $sigma) = @_;
+
+    my $d1 = _d1_function($S, $K, $t, $r_q, $mu, $sigma);
+    my $value;
+
+    if ($mu) {
+        $value =
+            $S *
+            ($sigma**2) /
+            (2.0 * $mu) *
+            (-($S / $K)**(-2.0 * $mu / ($sigma**2)) * pnorm($d1 - 2.0 * $mu / $sigma * sqrt($t)) + exp($mu * $t) * pnorm($d1));
+    } else {
+        $value = $S * ($sigma * sqrt($t)) * (Math::Business::Lookback::Common::dnorm($d1) + $d1 * pnorm($d1));
+    }
+
+    return $value;
+}
+
+=head2 _l_min
+
+This is a common function use to calculate the lookbacks options price. See [1] for details.
+
+=cut
+
+sub _l_min {
+    my ($S, $K, $t, $r_q, $mu, $sigma) = @_;
+
+    my $d1 = _d1_function($S, $K, $t, $r_q, $mu, $sigma);
+    my $value;
+
+    if ($mu) {
+        $value =
+            $S *
+            ($sigma**2) /
+            (2.0 * $mu) *
+            (($S / $K)**(-2.0 * $mu / ($sigma**2)) * pnorm(-$d1 + 2.0 * $mu / $sigma * sqrt($t)) - exp($mu * $t) * pnorm(-$d1));
+    } else {
+        $value = $S * ($sigma * sqrt($t)) * (Math::Business::Lookback::Common::dnorm($d1) + $d1 * (pnorm($d1) - 1));
+    }
+
+    return $value;
+}
+
 1;
