@@ -212,7 +212,7 @@ sub _l_max {
             (2.0 * $mu) *
             (-($S / $K)**(-2.0 * $mu / ($sigma**2)) * pnorm($d1 - 2.0 * $mu / $sigma * sqrt($t)) + exp($mu * $t) * pnorm($d1));
     } else {
-        $value = $S * ($sigma * sqrt($t)) * (Math::Business::Lookback::Common::dnorm($d1) + $d1 * pnorm($d1));
+        $value = $S * ($sigma * sqrt($t)) * (dnorm($d1) + $d1 * pnorm($d1));
     }
 
     return $value;
@@ -237,8 +237,23 @@ sub _l_min {
             (2.0 * $mu) *
             (($S / $K)**(-2.0 * $mu / ($sigma**2)) * pnorm(-$d1 + 2.0 * $mu / $sigma * sqrt($t)) - exp($mu * $t) * pnorm(-$d1));
     } else {
-        $value = $S * ($sigma * sqrt($t)) * (Math::Business::Lookback::Common::dnorm($d1) + $d1 * (pnorm($d1) - 1));
+        $value = $S * ($sigma * sqrt($t)) * (dnorm($d1) + $d1 * (pnorm($d1) - 1));
     }
+
+    return $value;
+}
+
+=head2 dnorm
+
+Standard normal density function
+
+=cut
+
+sub dnorm {    # Standard normal density function
+    my $x  = shift;
+    my $pi = 3.14159265359;
+
+    my $value = exp(-$x**2 / 2) / sqrt(2.0 * $pi);
 
     return $value;
 }
