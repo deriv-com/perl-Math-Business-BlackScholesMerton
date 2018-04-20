@@ -3,6 +3,7 @@ package Math::Business::BlackScholes::NonBinaries;
 use strict;
 use warnings;
 
+use List::Util qw(min max);
 use Math::CDF qw(pnorm);
 
 ## VERSION

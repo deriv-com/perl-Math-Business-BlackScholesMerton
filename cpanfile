@@ -1,3 +1,5 @@
+requires 'List::Util';
+requires 'Scalar::Util';
 requires 'Machine::Epsilon';
 requires 'Math::CDF';
 requires 'perl', '5.006';
@@ -13,4 +15,5 @@ on test => sub {
     requires 'Test::NoWarnings';
     requires 'Format::Util::Numbers';
     requires 'Test::Warnings';
+    requires 'Text::CSV::Slurp';
 };
