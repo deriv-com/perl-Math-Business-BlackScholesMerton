@@ -11,4 +11,6 @@ on test => sub {
     requires 'Test::More';
     requires 'Test::Most';
     requires 'Test::NoWarnings';
+    requires 'Format::Util::Numbers';
+    requires 'Test::Warnings';
 };
