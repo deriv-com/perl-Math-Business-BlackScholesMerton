@@ -2,8 +2,8 @@ package Math::Business::BlackScholes::Binaries;
 use strict;
 use warnings;
 
-our $VERSION = '1.22';
-
+## VERSION
+#
 my $SMALLTIME = 1 / (60 * 60 * 24 * 365);    # 1 second in years;
 
 use List::Util qw(max);
@@ -54,44 +54,6 @@ Paying another currency = correlation is between negative ONE and positive ONE.
 See [3] for Quanto formulas and examples
 
 =head1 SUBROUTINES
-
-=head2 vanilla_call
-
-    USAGE
-    my $price = vanilla_call($S, $K, $t, $r_q, $mu, $sigma)
-
-    DESCRIPTION
-    Price of a Vanilla Call
-
-=cut
-
-sub vanilla_call {
-    my ($S, $K, $t, $r_q, $mu, $sigma) = @_;
-
-    my $d1 = (log($S / $K) + ($mu + $sigma * $sigma / 2.0) * $t) / ($sigma * sqrt($t));
-    my $d2 = $d1 - ($sigma * sqrt($t));
-
-    return exp(-$r_q * $t) * ($S * exp($mu * $t) * pnorm($d1) - $K * pnorm($d2));
-}
-
-=head2 vanilla_put
-
-    USAGE
-    my $price = vanilla_put($S, $K, $t, $r_q, $mu, sigma)
-
-    DESCRIPTION
-    Price a standard Vanilla Put
-
-=cut
-
-sub vanilla_put {
-    my ($S, $K, $t, $r_q, $mu, $sigma) = @_;
-
-    my $d1 = (log($S / $K) + ($mu + $sigma * $sigma / 2.0) * $t) / ($sigma * sqrt($t));
-    my $d2 = $d1 - ($sigma * sqrt($t));
-
-    return -1 * exp(-$r_q * $t) * ($S * exp($mu * $t) * pnorm(-$d1) - $K * pnorm(-$d2));
-}
 
 =head2 call
 
@@ -800,72 +762,6 @@ sub range {
 
     return exp(-$r_q * $t) - upordown($S, $U, $D, $t, $r_q, $mu, $sigma, $w);
 }
-
-=head1 DEPENDENCIES
-
-    * Math::CDF
-    * Machine::Epsilon
-
-=head1 SOURCE CODE
-
-    https://github.com/binary-com/perl-math-business-blackscholes-binaries
-
-=head1 REFERENCES
-
-[1] P.G Zhang [1997], "Exotic Options", World Scientific
-    Another good refernce is Mark rubinstein, Eric Reiner [1991], "Binary Options", RISK 4, pp 75-83
-
-[2] Anlong Li [1999], "The pricing of double barrier options and their variations".
-    Advances in Futures and Options, 10, 1999. (paper).
-
-[3] Uwe Wystup. FX Options and  Strutured Products. Wiley Finance, England, 2006. pp 93-96 (Quantos)
-
-[4] Antoon Pelsser, "Pricing Double Barrier Options: An Analytical Approach", Jan 15 1997.
-    http://repub.eur.nl/pub/7807/1997-0152.pdf
-
-=head1 AUTHOR
-
-binary.com, C<< <rohan at binary.com> >>
-
-=head1 BUGS
-
-Please report any bugs or feature requests to
-C<bug-math-business-blackscholes-binaries at rt.cpan.org>, or through the web
-interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Math-Business-BlackScholes-Binaries>.
-I will be notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Math::Business::BlackScholes::Binaries
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Math-Business-BlackScholes-Binaries>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Math-Business-BlackScholes-Binaries>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Math-Business-BlackScholes-Binaries>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Math-Business-BlackScholes-Binaries/>
-
-=back
-
-=cut
 
 1;
 
