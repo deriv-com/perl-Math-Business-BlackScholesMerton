@@ -3,7 +3,7 @@
 use lib qw{ lib t/lib };
 use Test::Most;
 require Test::NoWarnings;
-use Math::Business::BlackScholes::Binaries;
+use Math::Business::BlackScholesMerton::Binaries;
 use Roundnear;
 
 my $S     = 1.35;
@@ -14,10 +14,10 @@ my $sigma = 0.11;
 my $r     = 0.002;
 my $q     = 0.001;
 
-$Math::Business::BlackScholes::Binaries::MIN_ACCURACY_UPORDOWN_PELSSER_1997 
+$Math::Business::BlackScholesMerton::Binaries::MIN_ACCURACY_UPORDOWN_PELSSER_1997 
     = 10**10;
 
-my $price_upordown = Math::Business::BlackScholes::Binaries::upordown(
+my $price_upordown = Math::Business::BlackScholesMerton::Binaries::upordown(
     $S, $barrier_u, $barrier_l, $t, $r, $r-$q, $sigma
 );
 ok ($price_upordown == 0, 'price_upordown');

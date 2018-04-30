@@ -1,6 +1,6 @@
-# Math::Business::BlackScholes::Binaries 
-[![Build Status](https://travis-ci.org/binary-com/perl-math-business-blackscholes-binaries.svg?branch=master)](https://travis-ci.org/binary-com/perl-math-business-blackscholes-binaries) 
-[![codecov](https://codecov.io/gh/binary-com/perl-math-business-blackscholes-binaries/branch/master/graph/badge.svg)](https://codecov.io/gh/binary-com/perl-math-business-blackscholes-binaries)
+# Math::Business::BlackScholesMerton
+[![Build Status](https://travis-ci.org/binary-com/perl-math-business-blackscholesmerton.svg?branch=master)](https://travis-ci.org/binary-com/perl-math-business-blackscholesmerton) 
+[![codecov](https://codecov.io/gh/binary-com/perl-math-business-blackscholesmerton/branch/master/graph/badge.svg)](https://codecov.io/gh/binary-com/perl-math-business-blackscholesmerton)
 
 Prices options using the GBM model, all closed formulas.
 
@@ -34,21 +34,21 @@ SUPPORT AND DOCUMENTATION
 After installing, you can find documentation for this module with the
 perldoc command.
 
-    perldoc Math::Business::BlackScholes::Binaries
+    perldoc Math::Business::BlackScholesMerton
 
 You can also look for information at:
 
     RT, CPAN's request tracker (report bugs here)
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Math-Business-BlackScholes-Binaries
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Math-Business-BlackScholesMerton
 
     AnnoCPAN, Annotated CPAN documentation
-        http://annocpan.org/dist/Math-Business-BlackScholes-Binaries
+        http://annocpan.org/dist/Math-Business-BlackScholesMerton
 
     CPAN Ratings
-        http://cpanratings.perl.org/d/Math-Business-BlackScholes-Binaries
+        http://cpanratings.perl.org/d/Math-Business-BlackScholesMerton
 
     Search CPAN
-        http://search.cpan.org/dist/Math-Business-BlackScholes-Binaries/
+        http://search.cpan.org/dist/Math-Business-BlackScholesMerton/
 
 
 LICENSE AND COPYRIGHT
