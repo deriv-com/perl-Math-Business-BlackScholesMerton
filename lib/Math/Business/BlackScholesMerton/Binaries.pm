@@ -1,4 +1,4 @@
-package Math::Business::BlackScholes::Binaries;
+package Math::Business::BlackScholesMerton::Binaries;
 use strict;
 use warnings;
 
@@ -11,18 +11,18 @@ use Math::CDF qw(pnorm);
 use Math::Trig;
 use Machine::Epsilon;
 
-# ABSTRACT: Algorithm of Math::Business::BlackScholes::Binaries
+# ABSTRACT: Algorithm of Math::Business::BlackScholesMerton::Binaries
 
 =head1 NAME
 
-Math::Business::BlackScholes::Binaries
+Math::Business::BlackScholesMerton::Binaries
 
 =head1 SYNOPSIS
 
-    use Math::Business::BlackScholes::Binaries;
+    use Math::Business::BlackScholesMerton::Binaries;
 
     # price of a Call option
-    my $price_call_option = Math::Business::BlackScholes::Binaries::call(
+    my $price_call_option = Math::Business::BlackScholesMerton::Binaries::call(
         1.35,       # stock price
         1.36,       # barrier
         (7/365),    # time
@@ -131,7 +131,7 @@ sub put {
 
 =head2 d2
 
-returns the DS term common to many BlackScholes formulae.
+returns the DS term common to many BlackScholesMerton formulae.
 
 =cut
 
@@ -356,9 +356,9 @@ sub upordown {
 #
 #   my ($S, $U, $D, $t, $r, $q, $vol, $w)
 #       = (100.00, 118.97, 99.00, 30/365, 0.1, 0.02, 0.01, 1);
-#   $up_price = Math::Business::BlackScholes::Binaries::ot_up_ko_down_pelsser_1997(
+#   $up_price = Math::Business::BlackScholesMerton::Binaries::ot_up_ko_down_pelsser_1997(
 #       $S,$U,$D,$t,$r,$q,$vol,$w);
-#   $down_price= Math::Business::BlackScholes::Binaries::ot_down_ko_up_pelsser_1997(
+#   $down_price= Math::Business::BlackScholesMerton::Binaries::ot_down_ko_up_pelsser_1997(
 #       $S,$U,$D,$t,$r,$q,$vol,$w);
 #
 # Thus we put a sanity checks here such that

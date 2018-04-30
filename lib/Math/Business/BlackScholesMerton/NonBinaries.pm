@@ -1,4 +1,4 @@
-package Math::Business::BlackScholes::NonBinaries;
+package Math::Business::BlackScholesMerton::NonBinaries;
 
 use strict;
 use warnings;
@@ -10,14 +10,14 @@ use Math::CDF qw(pnorm);
 
 =head1 NAME
 
-Math::Business::BlackScholes::NonBinaries
+Math::Business::BlackScholesMerton::NonBinaries
 
 =head1 SYNOPSIS
 
-    use Math::Business::BlackScholes::NonBinaries;
+    use Math::Business::BlackScholesMerton::NonBinaries;
 
     # price of a Call spread option
-    my $price_call_option = Math::Business::BlackScholes::NonBinaries::vanilla_call(
+    my $price_call_option = Math::Business::BlackScholesMerton::NonBinaries::vanilla_call(
         1.35,       # stock price
         1.34,       # barrier
         (7/365),    # time
@@ -182,7 +182,7 @@ sub lbhighlow {
 
 =head2 _d1_function
 
-returns the d1 term common to many BlackScholes formulae.
+returns the d1 term common to many BlackScholesMerton formulae.
 
 =cut
 

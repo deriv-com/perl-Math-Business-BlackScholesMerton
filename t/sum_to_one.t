@@ -3,7 +3,7 @@
 use lib qw{ lib t/lib };
 use Test::Most;
 require Test::NoWarnings;
-use Math::Business::BlackScholes::Binaries;
+use Math::Business::BlackScholesMerton::Binaries;
 use Roundnear;
 
 my $S     = 1.35;
@@ -13,10 +13,10 @@ my $r     = 0.002;
 my $q     = 0.001;
 
 # call + put = 1
-my $price_call = Math::Business::BlackScholes::Binaries::call(
+my $price_call = Math::Business::BlackScholesMerton::Binaries::call(
     $S, 1.36, 7/365, 0.002, 0.001, 0.11
 );
-my $price_put = Math::Business::BlackScholes::Binaries::put(
+my $price_put = Math::Business::BlackScholesMerton::Binaries::put(
     $S, 1.36, 7/365, 0.002, 0.001, 0.11
 );
 
@@ -27,10 +27,10 @@ ok ($rounded_price_call + $rounded_price_put == 1,
 
 
 # onetouch + notouch = 1
-my $price_onetouch = Math::Business::BlackScholes::Binaries::onetouch(
+my $price_onetouch = Math::Business::BlackScholesMerton::Binaries::onetouch(
     $S, 1.36, 7/365, 0.002, 0.001, 0.11
 );
-my $price_notouch = Math::Business::BlackScholes::Binaries::notouch(
+my $price_notouch = Math::Business::BlackScholesMerton::Binaries::notouch(
     $S, 1.36, 7/365, 0.002, 0.001, 0.11
 );
 
@@ -41,10 +41,10 @@ ok ($rounded_price_onetouch + $rounded_price_notouch == 1,
 
 
 # expiryrange + expirymiss = 1
-my $price_expiryrange = Math::Business::BlackScholes::Binaries::expiryrange(
+my $price_expiryrange = Math::Business::BlackScholesMerton::Binaries::expiryrange(
     $S, 1.36, 1.34, 7/365, 0.002, 0.001, 0.11
 );
-my $price_expirymiss = Math::Business::BlackScholes::Binaries::expirymiss(
+my $price_expirymiss = Math::Business::BlackScholesMerton::Binaries::expirymiss(
     $S, 1.36, 1.34, 7/365, 0.002, 0.001, 0.11
 );
 
@@ -55,10 +55,10 @@ ok ($rounded_price_expiryrange + $rounded_price_expirymiss == 1,
 
 
 # range + upordown = 1
-my $price_range = Math::Business::BlackScholes::Binaries::range(
+my $price_range = Math::Business::BlackScholesMerton::Binaries::range(
     $S, 1.36, 1.34, 7/365, 0.002, 0.001, 0.11
 );
-my $price_upordown = Math::Business::BlackScholes::Binaries::upordown(
+my $price_upordown = Math::Business::BlackScholesMerton::Binaries::upordown(
     $S, 1.36, 1.34, 7/365, 0.002, 0.001, 0.11
 );
 

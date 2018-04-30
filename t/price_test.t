@@ -6,7 +6,7 @@ use warnings;
 use Test::Most;
 use Test::Warn;
 use Test::Exception;
-use Math::Business::BlackScholes::NonBinaries;
+use Math::Business::BlackScholesMerton::NonBinaries;
 use Format::Util::Numbers qw(roundnear);
 
 subtest 'test_price' => sub {
@@ -101,7 +101,7 @@ sub test_price {
 
     my $price;
 
-    my $formula = 'Math::Business::BlackScholes::NonBinaries::' . $type;
+    my $formula = 'Math::Business::BlackScholesMerton::NonBinaries::' . $type;
 
     my $func = \&$formula;
 

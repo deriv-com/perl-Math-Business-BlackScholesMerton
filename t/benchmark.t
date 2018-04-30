@@ -7,7 +7,7 @@ use Test::Most;
 use Test::Warnings;
 use Test::Exception;
 
-use Math::Business::BlackScholes::NonBinaries;
+use Math::Business::BlackScholesMerton::NonBinaries;
 use Format::Util::Numbers qw(roundnear);
 use Text::CSV::Slurp;
 
@@ -79,7 +79,7 @@ sub test_price {
 
     my $price;
 
-    my $formula = 'Math::Business::BlackScholes::NonBinaries::' . $type;
+    my $formula = 'Math::Business::BlackScholesMerton::NonBinaries::' . $type;
 
     my $func = \&$formula;
 
