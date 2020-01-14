@@ -5,6 +5,9 @@ use warnings;
 
 use List::Util qw(min max);
 use Math::CDF qw(pnorm);
+use POSIX qw(ceil);
+
+use constant PI => 3.14159265359;
 
 ## VERSION
 
@@ -251,10 +254,9 @@ Standard normal density function
 =cut
 
 sub dnorm {    # Standard normal density function
-    my $x  = shift;
-    my $pi = 3.14159265359;
+    my $x = shift;
 
-    my $value = exp(-$x**2 / 2) / sqrt(2.0 * $pi);
+    my $value = exp(-$x**2 / 2) / sqrt(2.0 * PI);
 
     return $value;
 }
@@ -289,6 +291,117 @@ sub putspread {
     my ($S, $U, $D, $t, $r_q, $mu, $sigmaU, $sigmaD) = @_;
 
     return vanilla_put($S, $U, $t, $r_q, $mu, $sigmaU) - vanilla_put($S, $D, $t, $r_q, $mu, $sigmaD);
+}
+
+=head2 standardbarrier
+
+A function implemented by Diethelm Wuertz.
+
+Description of parameters:
+
+$S - starting spot
+$H - barrier
+$X - exercise price
+$K - cash rebate
+
+References:
+  Haug, Chapter 2.10.1
+
+=cut
+
+sub standardbarrier {
+    my ($S, $H, $X, $K, $tiy, $r, $q, $sigma, $type) = @_;
+
+    die 'wrong type[' . $type . ']' unless $type eq 'cdo' or $type eq 'puo';
+
+    my $mu     = ($q - $sigma ^ 2 / 2) / $sigma ^ 2;
+    my $lambda = sqrt($mu ^ 2 + 2 * $r / $sigma ^ 2);
+    my $X1     = log($S / $X) / ($sigma * sqrt($tiy)) + (1 + $mu) * $sigma * sqrt($tiy);
+    my $X2     = log($S / $H) / ($sigma * sqrt($tiy)) + (1 + $mu) * $sigma * sqrt($tiy);
+    my $y1     = (log($H ^ 2 / ($S * $X)) / ($sigma * sqrt($tiy)) + (1 + $mu) * $sigma * sqrt($tiy));
+    my $y2     = log($H / $S) / ($sigma * sqrt($tiy)) + (1 + $mu) * $sigma * sqrt($tiy);
+    my $Z      = log($H / $S) / ($sigma * sqrt($tiy)) + $lambda * $sigma * sqrt($tiy);
+    my ($eta, $phi) = $type eq 'cdo' ? (1, 1) : (-1, -1);
+
+    my $f1 = ($phi * $S * exp(($q - $r) * $tiy) * pnorm($phi * $X1) - $phi * $X * exp(-$r * $tiy) * pnorm($phi * $X1 - $phi * $sigma * sqrt($tiy)));
+
+    my $f2 = ($phi * $S * exp(($q - $r) * $tiy) * pnorm($phi * $X2) - $phi * $X * exp(-$r * $tiy) * pnorm($phi * $X2 - $phi * $sigma * sqrt($tiy)));
+
+    my $f3 = ($phi * $S * exp(($q - $r) * $tiy) * ($H / $S) ^ (2 * ($mu + 1)) * pnorm($eta * $y1) -
+            $phi * $X * exp(-$r * $tiy) * ($H / $S) ^ (2 * $mu) * pnorm($eta * $y1 - $eta * $sigma * sqrt($tiy)));
+
+    my $f4 = ($phi * $S * exp(($q - $r) * $tiy) * ($H / $S) ^ (2 * ($mu + 1)) * pnorm($eta * $y2) -
+            $phi * $X * exp(-$r * $tiy) * ($H / $S) ^ (2 * $mu) * pnorm($eta * $y2 - $eta * $sigma * sqrt($tiy)));
+
+    my $f6 = (
+        $K * (
+            ($H / $S) ^ ($mu + $lambda) * pnorm($eta * $Z) + ($H / $S) ^ ($mu - $lambda) * pnorm($eta * $Z - 2 * $eta * $lambda * $sigma * sqrt($tiy))
+        ));
+
+    if ($X >= $H) {
+        return $type eq 'cdo' ? $f1 - $f3 + $6 : $f2 - $4 + $f6;
+    }
+
+    return $type eq 'cdo' ? $f2 + $f6 - $f4 : $f1 - $f3 + $f6;
+}
+
+=head2 doubleknockout
+
+Description of parameters:
+
+$S - spot
+$L - lower barrier
+$U - upper barrier
+$K - payout strike
+$tiy - time in years
+$sigma - volatility
+$mu - mean
+$r - interest rate
+$type - 'c' for buy or 'p' for sell
+
+Reference:
+    https://core.ac.uk/download/pdf/19187200.pdf
+
+=cut
+
+sub doubleknockout {
+    my ($S, $L, $U, $tiy, $mu, $sigma, $r, $type) = @_;
+
+    my $eps = 10 ^ (-10);
+    my $l   = log($L / $U);
+    my $x   = log($S / $U);
+    my $K   = $S;
+    my $d   = log($K / $U);
+
+    my $k = ceil(sqrt(((-2 * log($eps) / $tiy) - ($mu / $sigma) ^ 2) / ((PI * $sigma / $l) ^ 2)));
+
+    if ($type eq 'c') {
+        return
+            exp(-$r * $tiy) *
+            ($U * (_calculate_q(1, $l, $l, $mu, $sigma, $x, $k, $tiy) - _calculate_q(1, $d, $l, $mu, $sigma, $x, $k, $tiy)) -
+                $K * (_calculate_q(0, $l, $l, $mu, $sigma, $x, $k, $tiy) - _calculate_q(0, $d, $l, $mu, $sigma, $x, $k, $tiy)));
+    }
+
+    return
+        exp(-$r * $tiy) *
+        ($K * (_calculate_q(0, $d, $l, $mu, $sigma, $x, $k, $tiy) - _calculate_q(0, 0, $l, $mu, $sigma, $x, $k, $tiy)) -
+            $U * (_calculate_q(1, $d, $l, $mu, $sigma, $x, $k, $tiy) - _calculate_q(1, 0, $l, $mu, $sigma, $x, $k, $tiy)));
+}
+
+sub _calculate_q {
+    my ($alpha, $y, $l, $mu, $sigma, $x, $k, $tiy) = @_;
+
+    my $z = 0;
+    for (my $i = 1; $i <= $k; $i++) {
+        my $lambda = 0.5 * (($mu / $sigma) ^ 2 + ($i * PI * $sigma / $l) ^ 2);
+        $z +=
+            exp(-$lambda * $tiy) *
+            sin($i * PI * $x / $l) *
+            ((($mu / ($sigma) ^ 2 + $alpha) * sin($i * PI * $y / $l) - ($i * PI / $l) * cos($i * PI * $y / $l)) /
+                (($mu / ($sigma) ^ 2 + $alpha) ^ 2 + ($i * PI / $l) ^ 2));
+    }
+
+    return (2 / $l) * exp(($mu / $sigma ^ 2) * ($y - $x)) * exp($alpha * $y) * $z;
 }
 
 1;
