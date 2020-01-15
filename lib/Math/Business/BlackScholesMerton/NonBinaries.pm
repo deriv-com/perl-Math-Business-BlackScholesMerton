@@ -6,6 +6,7 @@ use warnings;
 use List::Util qw(min max);
 use Math::CDF qw(pnorm);
 use POSIX qw(ceil);
+use Machine::Epsilon;
 
 use constant PI => 3.14159265359;
 
@@ -312,7 +313,7 @@ References:
 sub standardbarrier {
     my ($S, $H, $X, $K, $tiy, $r, $q, $sigma, $type) = @_;
 
-    die 'wrong type[' . $type . ']' unless $type eq 'cdo' or $type eq 'puo';
+    die 'wrong type[' . $type . ']' unless $type eq 'c' or $type eq 'p';
 
     my $mu     = ($q - $sigma ^ 2 / 2) / $sigma ^ 2;
     my $lambda = sqrt($mu ^ 2 + 2 * $r / $sigma ^ 2);
@@ -339,10 +340,10 @@ sub standardbarrier {
         ));
 
     if ($X >= $H) {
-        return $type eq 'cdo' ? $f1 - $f3 + $6 : $f2 - $4 + $f6;
+        return $type eq 'c' ? $f1 - $f3 + $6 : $f2 - $4 + $f6;
     }
 
-    return $type eq 'cdo' ? $f2 + $f6 - $f4 : $f1 - $f3 + $f6;
+    return $type eq 'c' ? $f2 + $f6 - $f4 : $f1 - $f3 + $f6;
 }
 
 =head2 doubleknockout
@@ -367,7 +368,7 @@ Reference:
 sub doubleknockout {
     my ($S, $L, $U, $tiy, $mu, $sigma, $r, $type) = @_;
 
-    my $eps = 10 ^ (-10);
+    my $eps = machine_epsilon();
     my $l   = log($L / $U);
     my $x   = log($S / $U);
     my $K   = $S;

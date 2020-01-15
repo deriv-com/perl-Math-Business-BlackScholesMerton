@@ -19,6 +19,7 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "List::Util" => 0,
     "Machine::Epsilon" => 0,
+    "POSIX" => 0,
     "Math::CDF" => 0,
     "Scalar::Util" => 0
   },
@@ -51,6 +52,7 @@ my %FallbackPrereqs = (
   "IPC::Open3" => 0,
   "List::Util" => 0,
   "Machine::Epsilon" => 0,
+  "POSIX" => 0,
   "Math::CDF" => 0,
   "Scalar::Util" => 0,
   "Test::CheckDeps" => "0.010",

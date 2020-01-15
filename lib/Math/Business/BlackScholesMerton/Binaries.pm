@@ -772,8 +772,8 @@ American Binary Knockout
 Description of parameters:
 
 $S - spot
-$L - lower barrier
-$U - upper barrier
+$H1 - lower barrier
+$H2 - upper barrier
 $K - payout strike
 $tiy - time in years
 $sigma - volatility
@@ -797,8 +797,7 @@ sub americanknockout {
     my $alpha = -0.5 * ($k1 - 1);
     my $beta  = -0.25 * ($k1 - 1) ^ 2 - 2 * $mu / $sigma ^ 2;
     my $L     = log($H2 / $H1);
-    my $eps   = 10 ^ (-10);
-    my $n     = ceil(sqrt(((-2 * log($eps) / $tiy) - ($mu / $sigma) ^ 2) / ((PI * $sigma / $L) ^ 2)));
+    my $n     = ceil(sqrt(((-2 * log($MACHINE_EPSILON) / $tiy) - ($mu / $sigma) ^ 2) / ((PI * $sigma / $L) ^ 2)));
 
     my $z = 0;
     for (my $i = 1; $i <= $n; $i++) {
