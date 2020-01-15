@@ -366,12 +366,11 @@ Reference:
 =cut
 
 sub doubleknockout {
-    my ($S, $L, $U, $tiy, $mu, $sigma, $r, $type) = @_;
+    my ($S, $L, $U, $K, $tiy, $mu, $sigma, $r, $type) = @_;
 
     my $eps = machine_epsilon();
     my $l   = log($L / $U);
     my $x   = log($S / $U);
-    my $K   = $S;
     my $d   = log($K / $U);
 
     my $k = ceil(sqrt(((-2 * log($eps) / $tiy) - ($mu / $sigma) ^ 2) / ((PI * $sigma / $l) ^ 2)));
