@@ -369,23 +369,23 @@ sub doubleknockout {
     my ($S, $H2, $H1, $K, $tiy, $mu, $sigma, $r, $type) = @_;
 
     my $eps = machine_epsilon();
-    my $H2   = log($H2 / $H1);
+    my $l   = log($H2 / $H1);
     my $x   = log($S / $H1);
     my $d   = log($K / $H1);
 
-    my $k = ceil(sqrt(((-2 * log($eps) / $tiy) - ($mu / $sigma) ^ 2) / ((PI * $sigma / $H2) ^ 2)));
+    my $k = ceil(sqrt(((-2 * log($eps) / $tiy) - ($mu / $sigma) ^ 2) / ((PI * $sigma / $l) ^ 2)));
 
     if ($type eq 'c') {
         return
             exp(-$r * $tiy) *
-            ($H1 * (_calculate_q(1, $H2, $H2, $mu, $sigma, $x, $k, $tiy) - _calculate_q(1, $d, $H2, $mu, $sigma, $x, $k, $tiy)) -
-                $K * (_calculate_q(0, $H2, $H2, $mu, $sigma, $x, $k, $tiy) - _calculate_q(0, $d, $H2, $mu, $sigma, $x, $k, $tiy)));
+            ($H1 * (_calculate_q(1, $l, $l, $mu, $sigma, $x, $k, $tiy) - _calculate_q(1, $d, $l, $mu, $sigma, $x, $k, $tiy)) -
+                $K * (_calculate_q(0, $l, $l, $mu, $sigma, $x, $k, $tiy) - _calculate_q(0, $d, $l, $mu, $sigma, $x, $k, $tiy)));
     }
 
     return
         exp(-$r * $tiy) *
-        ($K * (_calculate_q(0, $d, $H2, $mu, $sigma, $x, $k, $tiy) - _calculate_q(0, 0, $H2, $mu, $sigma, $x, $k, $tiy)) -
-            $H1 * (_calculate_q(1, $d, $H2, $mu, $sigma, $x, $k, $tiy) - _calculate_q(1, 0, $H2, $mu, $sigma, $x, $k, $tiy)));
+        ($K * (_calculate_q(0, $d, $l, $mu, $sigma, $x, $k, $tiy) - _calculate_q(0, 0, $l, $mu, $sigma, $x, $k, $tiy)) -
+            $H1 * (_calculate_q(1, $d, $l, $mu, $sigma, $x, $k, $tiy) - _calculate_q(1, 0, $l, $mu, $sigma, $x, $k, $tiy)));
 }
 
 sub _calculate_q {
