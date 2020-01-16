@@ -339,9 +339,6 @@ sub standardbarrier {
             ($H / $S) ** ($mu + $lambda) * pnorm($eta * $Z) + ($H / $S) ** ($mu - $lambda) * pnorm($eta * $Z - 2 * $eta * $lambda * $sigma * sqrt($tiy))
         ));
 
-    warn "mu $mu lambda $lambda";
-    warn "x1 $X1 x2 $X2 y1 $y1 y2 $y2 z $Z";
-    warn "f1 $f1 f2 $f2 f3 $f3 f4 $f4 f6 $f6";
     if ($X >= $H) {
         return $type eq 'c' ? $f1 - $f3 + $f6 : $f2 - $4 + $f6;
     }
