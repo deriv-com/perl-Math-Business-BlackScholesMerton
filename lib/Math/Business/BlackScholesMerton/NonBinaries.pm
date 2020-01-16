@@ -340,7 +340,7 @@ sub standardbarrier {
     );
 
     if ($X >= $H) {
-        return $type eq 'c' ? $f1 - $f3 + $f6 : $f2 - $4 + $f6;
+        return $type eq 'c' ? $f1 - $f3 + $f6 : $f2 - $f4 + $f6;
     }
 
     return $type eq 'c' ? $f2 + $f6 - $f4 : $f1 - $f3 + $f6;
