@@ -76,7 +76,7 @@ See [3] for Quanto formulas and examples
 
     EXPLANATION
     The definition of the contract is that if S > K, it gives
-    full payout (1).  However the formula DC(T,K) = e^(-rT) N(d2) will not be
+    full payout (1).  However the formula DC(T,K) = e**(-rT) N(d2) will not be
     correct when T->0 and K=S.  The value of DC(T,K) for this case will be 0.5.
 
     The formula is actually "correct" because when T->0 and S=K, the probability
@@ -793,22 +793,22 @@ sub americanknockout {
         ($H1, $H2) = ($H2, $H1);
     }
 
-    my $k1    = 2 * $mu / $sigma ^ 2;
+    my $k1    = 2 * $mu / $sigma ** 2;
     my $alpha = -0.5 * ($k1 - 1);
-    my $beta  = -0.25 * ($k1 - 1) ^ 2 - 2 * $mu / $sigma ^ 2;
+    my $beta  = -0.25 * ($k1 - 1) ** 2 - 2 * $mu / $sigma ** 2;
     my $L     = log($H2 / $H1);
-    my $n     = ceil(sqrt(((-2 * log($MACHINE_EPSILON) / $tiy) - ($mu / $sigma) ^ 2) / ((PI * $sigma / $L) ^ 2)));
+    my $n     = ceil(sqrt(((-2 * log($MACHINE_EPSILON) / $tiy) - ($mu / $sigma) ** 2) / ((PI * $sigma / $L) ** 2)));
 
     my $z = 0;
     for (my $i = 1; $i <= $n; $i++) {
         my $zeta = $i * PI / $L;
         $z +=
             (2 / ($i * PI)) *
-            (($beta - ($zeta ^ 2) * exp(-0.5 * $tiy * ($sigma ^ 2) * ($zeta ^ 2 - $beta))) / ($zeta ^ 2 - $beta)) *
+            (($beta - ($zeta ** 2) * exp(-0.5 * $tiy * ($sigma ** 2) * ($zeta ** 2 - $beta))) / ($zeta ** 2 - $beta)) *
             sin($zeta * log($S / $H1));
     }
 
-    return $K * (($S / $H1) ^ $alpha) * ($z + (1 - log($S / $H1) / $L));
+    return $K * (($S / $H1) ** $alpha) * ($z + (1 - log($S / $H1) / $L));
 }
 
 1;

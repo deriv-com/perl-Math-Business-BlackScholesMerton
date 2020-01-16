@@ -315,32 +315,35 @@ sub standardbarrier {
 
     die 'wrong type[' . $type . ']' unless $type eq 'c' or $type eq 'p';
 
-    my $mu     = ($q - $sigma ^ 2 / 2) / $sigma ^ 2;
-    my $lambda = sqrt($mu ^ 2 + 2 * $r / $sigma ^ 2);
+    my $mu     = ($q - $sigma**2 / 2) / $sigma**2;
+    my $lambda = sqrt($mu**2 + 2 * $r / $sigma**2);
     my $X1     = log($S / $X) / ($sigma * sqrt($tiy)) + (1 + $mu) * $sigma * sqrt($tiy);
     my $X2     = log($S / $H) / ($sigma * sqrt($tiy)) + (1 + $mu) * $sigma * sqrt($tiy);
-    my $y1     = (log($H ^ 2 / ($S * $X)) / ($sigma * sqrt($tiy)) + (1 + $mu) * $sigma * sqrt($tiy));
+    my $y1     = (log($H ** 2 / ($S * $X)) / ($sigma * sqrt($tiy)) + (1 + $mu) * $sigma * sqrt($tiy));
     my $y2     = log($H / $S) / ($sigma * sqrt($tiy)) + (1 + $mu) * $sigma * sqrt($tiy);
     my $Z      = log($H / $S) / ($sigma * sqrt($tiy)) + $lambda * $sigma * sqrt($tiy);
-    my ($eta, $phi) = $type eq 'cdo' ? (1, 1) : (-1, -1);
+    my ($eta, $phi) = $type eq 'c' ? (1, 1) : (-1, -1);
 
     my $f1 = ($phi * $S * exp(($q - $r) * $tiy) * pnorm($phi * $X1) - $phi * $X * exp(-$r * $tiy) * pnorm($phi * $X1 - $phi * $sigma * sqrt($tiy)));
 
     my $f2 = ($phi * $S * exp(($q - $r) * $tiy) * pnorm($phi * $X2) - $phi * $X * exp(-$r * $tiy) * pnorm($phi * $X2 - $phi * $sigma * sqrt($tiy)));
 
-    my $f3 = ($phi * $S * exp(($q - $r) * $tiy) * ($H / $S) ^ (2 * ($mu + 1)) * pnorm($eta * $y1) -
-            $phi * $X * exp(-$r * $tiy) * ($H / $S) ^ (2 * $mu) * pnorm($eta * $y1 - $eta * $sigma * sqrt($tiy)));
+    my $f3 = ($phi * $S * exp(($q - $r) * $tiy) * ($H / $S) ** (2 * ($mu + 1)) * pnorm($eta * $y1) -
+            $phi * $X * exp(-$r * $tiy) * ($H / $S) ** (2 * $mu) * pnorm($eta * $y1 - $eta * $sigma * sqrt($tiy)));
 
-    my $f4 = ($phi * $S * exp(($q - $r) * $tiy) * ($H / $S) ^ (2 * ($mu + 1)) * pnorm($eta * $y2) -
-            $phi * $X * exp(-$r * $tiy) * ($H / $S) ^ (2 * $mu) * pnorm($eta * $y2 - $eta * $sigma * sqrt($tiy)));
+    my $f4 = ($phi * $S * exp(($q - $r) * $tiy) * ($H / $S) ** (2 * ($mu + 1)) * pnorm($eta * $y2) -
+            $phi * $X * exp(-$r * $tiy) * ($H / $S) ** (2 * $mu) * pnorm($eta * $y2 - $eta * $sigma * sqrt($tiy)));
 
     my $f6 = (
         $K * (
-            ($H / $S) ^ ($mu + $lambda) * pnorm($eta * $Z) + ($H / $S) ^ ($mu - $lambda) * pnorm($eta * $Z - 2 * $eta * $lambda * $sigma * sqrt($tiy))
+            ($H / $S) ** ($mu + $lambda) * pnorm($eta * $Z) + ($H / $S) ** ($mu - $lambda) * pnorm($eta * $Z - 2 * $eta * $lambda * $sigma * sqrt($tiy))
         ));
 
+    warn "mu $mu lambda $lambda";
+    warn "x1 $X1 x2 $X2 y1 $y1 y2 $y2 z $Z";
+    warn "f1 $f1 f2 $f2 f3 $f3 f4 $f4 f6 $f6";
     if ($X >= $H) {
-        return $type eq 'c' ? $f1 - $f3 + $6 : $f2 - $4 + $f6;
+        return $type eq 'c' ? $f1 - $f3 + $f6 : $f2 - $4 + $f6;
     }
 
     return $type eq 'c' ? $f2 + $f6 - $f4 : $f1 - $f3 + $f6;
@@ -373,7 +376,7 @@ sub doubleknockout {
     my $x   = log($S / $H1);
     my $d   = log($K / $H1);
 
-    my $k = ceil(sqrt(((-2 * log($eps) / $tiy) - ($mu / $sigma) ^ 2) / ((PI * $sigma / $l) ^ 2)));
+    my $k = ceil(sqrt(((-2 * log($eps) / $tiy) - ($mu / $sigma) ** 2) / ((PI * $sigma / $l) ** 2)));
 
     if ($type eq 'c') {
         return
@@ -393,15 +396,15 @@ sub _calculate_q {
 
     my $z = 0;
     for (my $i = 1; $i <= $k; $i++) {
-        my $lambda = 0.5 * (($mu / $sigma) ^ 2 + ($i * PI * $sigma / $l) ^ 2);
+        my $lambda = 0.5 * (($mu / $sigma) ** 2 + ($i * PI * $sigma / $l) ** 2);
         $z +=
             exp(-$lambda * $tiy) *
             sin($i * PI * $x / $l) *
-            ((($mu / ($sigma) ^ 2 + $alpha) * sin($i * PI * $y / $l) - ($i * PI / $l) * cos($i * PI * $y / $l)) /
-                (($mu / ($sigma) ^ 2 + $alpha) ^ 2 + ($i * PI / $l) ^ 2));
+            ((($mu / ($sigma) ** 2 + $alpha) * sin($i * PI * $y / $l) - ($i * PI / $l) * cos($i * PI * $y / $l)) /
+                (($mu / ($sigma) ** 2 + $alpha) ** 2 + ($i * PI / $l) ** 2));
     }
 
-    return (2 / $l) * exp(($mu / $sigma ^ 2) * ($y - $x)) * exp($alpha * $y) * $z;
+    return (2 / $l) * exp(($mu / $sigma ** 2) * ($y - $x)) * exp($alpha * $y) * $z;
 }
 
 1;
