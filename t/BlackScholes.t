@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use lib qw{ lib t/lib };
-use Test::More tests => 25;
+use Test::More tests => 28;
 use Test::NoWarnings;
 use Math::Business::BlackScholesMerton::Binaries;
 use Math::Business::BlackScholesMerton::NonBinaries;
@@ -93,7 +93,9 @@ my @binaries = ({
 
 );
 
-foreach my $test_group (['Math::Business::BlackScholesMerton::Binaries::', \@binaries], ['Math::Business::BlackScholesMerton::NonBinaries::', \@vanillas]) {
+foreach
+    my $test_group (['Math::Business::BlackScholesMerton::Binaries::', \@binaries], ['Math::Business::BlackScholesMerton::NonBinaries::', \@vanillas])
+{
     foreach my $test_case (@{$test_group->[1]}) {
         my $formula_name = $test_group->[0] . $test_case->{type};
         my %probs        = (
@@ -109,3 +111,27 @@ foreach my $test_group (['Math::Business::BlackScholesMerton::Binaries::', \@bin
     }
 }
 
+subtest standardbarrier => sub {
+    is Math::Business::BlackScholesMerton::NonBinaries::standardbarrier(1, 0.9, 1.01, 0, 3600 / (365 * 86400), 0, 0, 1, 'c'), 0.00101790998547061;
+    is Math::Business::BlackScholesMerton::NonBinaries::standardbarrier(1, 1.1, 1.01, 0, 3600 / (365 * 86400), 0, 0, 1, 'p'), 0.0110179099854707;
+};
+
+subtest americankockout => sub {
+    is Math::Business::BlackScholesMerton::Binaries::americanknockout(1, 0.900371554871544, 1.02565413536521, 0.0251503965589421,
+        0.000114155251141553, 1, 0, 'c'),
+        -1.00845594935565e-10;
+    is Math::Business::BlackScholesMerton::Binaries::americanknockout(1, 1.09965766237894, 0.974353369833198, 0.0251430391535339,
+        0.000114155251141553, 1, 0, 'p'),
+        0.000382778070702198;
+};
+
+subtest doubleknockout => sub {
+    is Math::Business::BlackScholesMerton::NonBinaries::doubleknockout(
+        1, 1.09965766237894, 0.974353369833198, 0.999496335095654, 0.000114155251141553, 0, 1, 0, 'p'
+        ),
+        0.00360928815119504;
+    is Math::Business::BlackScholesMerton::NonBinaries::doubleknockout(
+        1, 0.900371554871544, 1.02565413536521, 1.00050366490435, 0.000114155251141553, 0, 1, 0, 'c'
+        ),
+        -0.00449062397285471;
+};
