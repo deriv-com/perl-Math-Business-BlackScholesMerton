@@ -3,11 +3,14 @@ use strict;
 use warnings;
 
 ## VERSION
-#
+
+use constant PI => 3.14159265359;
+
 my $SMALLTIME = 1 / (60 * 60 * 24 * 365);    # 1 second in years;
 
 use List::Util qw(max);
 use Math::CDF qw(pnorm);
+use POSIX qw(ceil);
 use Math::Trig;
 use Machine::Epsilon;
 
@@ -73,7 +76,7 @@ See [3] for Quanto formulas and examples
 
     EXPLANATION
     The definition of the contract is that if S > K, it gives
-    full payout (1).  However the formula DC(T,K) = e^(-rT) N(d2) will not be
+    full payout (1).  However the formula DC(T,K) = e**(-rT) N(d2) will not be
     correct when T->0 and K=S.  The value of DC(T,K) for this case will be 0.5.
 
     The formula is actually "correct" because when T->0 and S=K, the probability
@@ -564,9 +567,9 @@ sub get_stability_constant_pelsser_1997 {
             . "be 1, 2 or 3. Given $p.";
     }
 
-    my $h       = log($U / $D);
-    my $x       = log($S / $D);
-    my $mu_new  = $mu - (0.5 * $sigma * $sigma);
+    my $h      = log($U / $D);
+    my $x      = log($S / $D);
+    my $mu_new = $mu - (0.5 * $sigma * $sigma);
 
     my $numerator = $MIN_ACCURACY_UPORDOWN_PELSSER_1997 * exp(1.0 - $mu_new * (($eta * $h) - $x) / ($sigma * $sigma));
     my $denominator = (exp(1) * (Math::Trig::pi + $p)) + (max($mu_new * (($eta * $h) - $x), 0.0) * Math::Trig::pi / ($sigma**2));
@@ -615,7 +618,7 @@ sub ot_down_ko_up_pelsser_1997 {
     my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w) = @_;
 
     my $mu_new = $mu - (0.5 * $sigma * $sigma);
-    my $x      = log($S / $D);
+    my $x = log($S / $D);
 
     return exp(-$mu_new * $x / ($sigma * $sigma)) * common_function_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, 0);
 }
@@ -643,7 +646,6 @@ sub get_min_iterations_pelsser_1997 {
     } elsif ($accuracy <= 0) {
         $accuracy = $MIN_ACCURACY_UPORDOWN_PELSSER_1997;
     }
-
 
     my $it_up = _get_min_iterations_ot_up_ko_down_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy);
     my $it_down = _get_min_iterations_ot_down_ko_up_pelsser_1997($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy);
@@ -723,7 +725,7 @@ sub _get_min_iterations_ot_up_ko_down_pelsser_1997 {
 sub _get_min_iterations_ot_down_ko_up_pelsser_1997 {
     my ($S, $U, $D, $t, $r_q, $mu, $sigma, $w, $accuracy) = @_;
 
-    my $h      = log($U / $D);
+    my $h = log($U / $D);
     my $mu_new = $mu - (0.5 * $sigma * $sigma);
 
     $accuracy = $accuracy * exp($mu_new * $h / ($sigma * $sigma));
@@ -761,6 +763,52 @@ sub range {
     $w = 1;
 
     return exp(-$r_q * $t) - upordown($S, $U, $D, $t, $r_q, $mu, $sigma, $w);
+}
+
+=head2 americanknockout
+
+American Binary Knockout
+
+Description of parameters:
+
+$S - spot
+$H1 - lower barrier
+$H2 - upper barrier
+$K - payout strike
+$tiy - time in years
+$sigma - volatility
+$mu - mean
+$r - interest rate
+$type - 'c' for buy or 'p' for sell
+
+Reference:
+    http://www.phy.cuhk.edu.hk/~cflo/Finance/chohoi/afe.pdf
+
+=cut
+
+sub americanknockout {
+    my ($S, $H2, $H1, $K, $tiy, $sigma, $mu, $type) = @_;
+
+    if ($type eq 'c') {
+        ($H1, $H2) = ($H2, $H1);
+    }
+
+    my $k1    = 2 * $mu / $sigma**2;
+    my $alpha = -0.5 * ($k1 - 1);
+    my $beta  = -0.25 * ($k1 - 1)**2 - 2 * $mu / $sigma**2;
+    my $L     = log($H2 / $H1);
+    my $n     = ceil(sqrt(((-2 * log($MACHINE_EPSILON) / $tiy) - ($mu / $sigma)**2) / ((PI * $sigma / $L)**2)));
+
+    my $z = 0;
+    for (my $i = 1; $i <= $n; $i++) {
+        my $zeta = $i * PI / $L;
+        $z +=
+            (2 / ($i * PI)) *
+            (($beta - ($zeta**2) * exp(-0.5 * $tiy * ($sigma**2) * ($zeta**2 - $beta))) / ($zeta**2 - $beta)) *
+            sin($zeta * log($S / $H1));
+    }
+
+    return $K * (($S / $H1)**$alpha) * ($z + (1 - log($S / $H1) / $L));
 }
 
 1;
