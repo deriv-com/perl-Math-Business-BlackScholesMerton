@@ -2,7 +2,6 @@ requires 'List::Util';
 requires 'Scalar::Util';
 requires 'Machine::Epsilon';
 requires 'Math::CDF';
-requires 'POSIX';
 requires 'perl', '5.006';
 
 on configure => sub {
