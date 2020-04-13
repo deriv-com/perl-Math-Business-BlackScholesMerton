@@ -809,7 +809,7 @@ sub americanknockout {
     }
 
     # For smaller durations or barriers farther apart, the value could converge to a small negative value
-    return max(0, $K * (($S / $H1)**$alpha) * ($z + (1 - log($S / $H1) / $L)));
+    return max(0,$K * (($S / $H1)**$alpha) * ($z + (1 - log($S / $H1) / $L)));
 }
 
 1;
