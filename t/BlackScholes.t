@@ -117,9 +117,9 @@ subtest standardbarrier => sub {
 };
 
 subtest americankockout => sub {
-    is Math::Business::BlackScholesMerton::Binaries::americanknockout(1, 0.900371554871544, 1.02565413536521, 0.0251503965589421,
+    is Math::Business::BlackScholesMerton::Binaries::americanknockout(1, 1.02565413536521, 0.900371554871544, 0.0251503965589421,
         0.000114155251141553, 1, 0, 'c'),
-        -1.00845594935565e-10;
+        0.000440771207092925;
     is Math::Business::BlackScholesMerton::Binaries::americanknockout(1, 1.09965766237894, 0.974353369833198, 0.0251430391535339,
         0.000114155251141553, 1, 0, 'p'),
         0.000382778070702198;
