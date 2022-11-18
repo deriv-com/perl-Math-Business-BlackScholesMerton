@@ -1,93 +1,69 @@
-# Math::Business::BlackScholesMerton
-[![Build Status](https://travis-ci.org/binary-com/perl-math-business-blackscholesmerton.svg?branch=master)](https://travis-ci.org/binary-com/perl-math-business-blackscholesmerton) 
-[![codecov](https://codecov.io/gh/binary-com/perl-math-business-blackscholesmerton/branch/master/graph/badge.svg)](https://codecov.io/gh/binary-com/perl-math-business-blackscholesmerton)
+# NAME
 
-Prices options using the GBM model, all closed formulas.
+Math::Business::BlackScholesMerton
 
-Important(a): Basically, one_touch, up_or_down and double_touch have two cases of 
-payoff either at end or at hit. We treat them differently. We use parameter 
-$w to differ them.
+# DESCRIPTION
 
-$w = 0: payoff at hit time.
-$w = 1: payoff at end.
+Please refer to documentions in [Math::Business::BlackScholesMerton::Binaries](https://metacpan.org/pod/Math%3A%3ABusiness%3A%3ABlackScholesMerton%3A%3ABinaries) and [Math::Business::BlackScholesMerton::NonBinaries](https://metacpan.org/pod/Math%3A%3ABusiness%3A%3ABlackScholesMerton%3A%3ANonBinaries) for more details.
 
-Our current contracts pay rebate at hit time, so we set $w = 0 by default.
+# DEPENDENCIES
 
-Important(b) :Furthermore, for all our contracts, we allow a different 
-payout currency (Quantos).
+    * Math::CDF
+    * Machine::Epsilon
 
-Paying domestic currency (JPY if for USDJPY) = correlation coefficient is ZERO.
-Paying foreign currency (USD if for USDJPY) = correlation coefficient is ONE.
-Paying another currency = correlation is between negative ONE and positive ONE.
+# SOURCE CODE
 
-INSTALLATION
+    https://github.com/binary-com/perl-math-business-blackscholesmerton
 
-To install this module, run the following commands:
+# REFERENCES
 
-	perl Makefile.PL
-	make
-	make test
-	make install
+\[1\] P.G Zhang \[1997\], "Exotic Options", World Scientific
+    Another good refernce is Mark rubinstein, Eric Reiner \[1991\], "Binary Options", RISK 4, pp 75-83
 
-SUPPORT AND DOCUMENTATION
+\[2\] Anlong Li \[1999\], "The pricing of double barrier options and their variations".
+    Advances in Futures and Options, 10, 1999. (paper).
 
-After installing, you can find documentation for this module with the
-perldoc command.
+\[3\] Uwe Wystup. FX Options and  Strutured Products. Wiley Finance, England, 2006. pp 93-96 (Quantos)
+
+\[4\] Antoon Pelsser, "Pricing Double Barrier Options: An Analytical Approach", Jan 15 1997.
+    http://repub.eur.nl/pub/7807/1997-0152.pdf
+
+\[5\] Espen Gaarder Haug, PhD
+    The Complete Guide to Option Pricing Formulas p141-p144
+
+# AUTHOR
+
+binary.com, `<rohan at binary.com>`
+
+# BUGS
+
+Please report any bugs or feature requests to
+`bug-math-business-blackscholesmerton at rt.cpan.org`, or through the web
+interface at
+[http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Math-Business-BlackScholesMerton](http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Math-Business-BlackScholesMerton).
+I will be notified, and then you'll automatically be notified of progress on
+your bug as I make changes.
+
+# SUPPORT
+
+You can find documentation for this module with the perldoc command.
 
     perldoc Math::Business::BlackScholesMerton
 
 You can also look for information at:
 
-    RT, CPAN's request tracker (report bugs here)
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Math-Business-BlackScholesMerton
+- RT: CPAN's request tracker (report bugs here)
 
-    AnnoCPAN, Annotated CPAN documentation
-        http://annocpan.org/dist/Math-Business-BlackScholesMerton
+    [http://rt.cpan.org/NoAuth/Bugs.html?Dist=Math-Business-BlackScholesMerton](http://rt.cpan.org/NoAuth/Bugs.html?Dist=Math-Business-BlackScholesMerton)
 
-    CPAN Ratings
-        http://cpanratings.perl.org/d/Math-Business-BlackScholesMerton
+- AnnoCPAN: Annotated CPAN documentation
 
-    Search CPAN
-        http://search.cpan.org/dist/Math-Business-BlackScholesMerton/
+    [http://annocpan.org/dist/Math-Business-BlackScholesMerton](http://annocpan.org/dist/Math-Business-BlackScholesMerton)
 
+- CPAN Ratings
 
-LICENSE AND COPYRIGHT
+    [http://cpanratings.perl.org/d/Math-Business-BlackScholesMerton](http://cpanratings.perl.org/d/Math-Business-BlackScholesMerton)
 
-Copyright (C) 2014 binary.com
+- Search CPAN
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of the the Artistic License (2.0). You may obtain a
-copy of the full license at:
-
-L<http://www.perlfoundation.org/artistic_license_2_0>
-
-Any use, modification, and distribution of the Standard or Modified
-Versions is governed by this Artistic License. By using, modifying or
-distributing the Package, you accept this license. Do not use, modify,
-or distribute the Package, if you do not accept this license.
-
-If your Modified Version has been derived from a Modified Version made
-by someone other than you, you are nevertheless required to ensure that
-your Modified Version complies with the requirements of this license.
-
-This license does not grant you the right to use any trademark, service
-mark, tradename, or logo of the Copyright Holder.
-
-This license includes the non-exclusive, worldwide, free-of-charge
-patent license to make, have made, use, offer to sell, sell, import and
-otherwise transfer the Package with respect to any patent claims
-licensable by the Copyright Holder that are necessarily infringed by the
-Package. If you institute patent litigation (including a cross-claim or
-counterclaim) against any party alleging that the Package constitutes
-direct or contributory patent infringement, then this Artistic License
-to you shall terminate on the date that such litigation is filed.
-
-Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
-AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
-THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
-YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
-CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
-CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+    [http://search.cpan.org/dist/Math-Business-BlackScholesMerton/](http://search.cpan.org/dist/Math-Business-BlackScholesMerton/)
