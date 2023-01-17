@@ -8,6 +8,9 @@ use Math::CDF qw(pnorm);
 use POSIX qw(ceil);
 use Machine::Epsilon;
 
+# import call, put and onetouch from Binaries to use it in sharkfin
+use Math::Business::BlackScholesMerton::Binaries qw(call put onetouch);
+
 use constant PI => 3.14159265359;
 
 ## VERSION
@@ -402,6 +405,51 @@ sub _calculate_q {
     }
 
     return (2 / $l) * exp(($mu / $sigma**2) * ($y - $x)) * exp($alpha * $y) * $z;
+}
+
+=head2 sharkfin
+
+    Description of parameters:
+
+    $S - spot
+    $K - strike
+    $B - KO barrier
+    $t - time in years
+    $sigma - volatility
+    $mu - mean
+    $r_q - interest rate
+    $type - 'c' for call or 'p' for put
+    $rebate - 0: without , 1: with 
+
+    References:
+        https://people.maths.ox.ac.uk/howison/barriers.pdf
+        https://docs.google.com/document/d/1_Omrwwy4FPB8VKSOyqBlCue3JZVVuiKl/edit
+
+
+=cut
+
+sub sharkfin {
+    my ($S, $K, $B, $t, $mu, $sigma, $r_q, $type, $rebate) = @_;
+
+    if ($type eq 'c'){
+        my upandout_call = vanilla_call($S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($S, $B, $t, $r_q, $mu, $sigma) 
+                            - ($B-$K) * call($S, $B, $t, $r_q, $mu, $sigma)
+                            - $S/$B * (vanilla_call($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($B**2/$S, $B, $t, $r_q, $mu, $sigma)
+                            - ($B-$K) * call($B**2/$S, $B, $t, $r_q, $mu, $sigma));
+        return upandout_call unless rebate;
+        return $S<$B ? upandout_call/(1 - onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
+    };
+
+    elsif ($type eq 'p'){
+        my downandout_put = vanilla_put($S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($S, $B, $t, $r_q, $mu, $sigma) 
+                            - ($K-$B) * put($S, $B, $t, $r_q, $mu, $sigma)
+                            - $S/$B * (vanilla_put($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($B**2/$S, $B, $t, $r_q, $mu, $sigma)
+                            - ($K-$B) * put($B**2/$S, $B, $t, $r_q, $mu, $sigma));
+        return upandout_call unless rebate;
+        return $S>$B ? downandout_put/(1 - onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
+    };    
+
+    return ;
 }
 
 1;
