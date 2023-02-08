@@ -7,9 +7,7 @@ use List::Util qw(min max);
 use Math::CDF qw(pnorm);
 use POSIX qw(ceil);
 use Machine::Epsilon;
-
-# import call, put and onetouch from Binaries to use it in sharkfin
-use Math::Business::BlackScholesMerton::Binaries qw(call put onetouch);
+use Math::Business::BlackScholesMerton::Binaries;
 
 use constant PI => 3.14159265359;
 
@@ -428,14 +426,14 @@ sub _calculate_q {
 =cut
 
 sub sharkfincall {
-    my ($S, $K, $B, $t, $mu, $sigma, $r_q, $type, $rebate) = @_;
+    my ($S, $K, $t, $r_q, $mu, $sigma, $B, $rebate) = @_;
 
-    my upandout_call = vanilla_call($S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($S, $B, $t, $r_q, $mu, $sigma) 
-                        - ($B-$K) * call($S, $B, $t, $r_q, $mu, $sigma)
+    my $upandout_call = vanilla_call($S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($S, $B, $t, $r_q, $mu, $sigma) 
+                        - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($S, $B, $t, $r_q, $mu, $sigma)
                         - $S/$B * (vanilla_call($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($B**2/$S, $B, $t, $r_q, $mu, $sigma)
-                        - ($B-$K) * call($B**2/$S, $B, $t, $r_q, $mu, $sigma));
-    return upandout_call unless rebate;
-    return $S<$B ? upandout_call/(1 - onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
+                        - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($B**2/$S, $B, $t, $r_q, $mu, $sigma));
+    return $upandout_call unless $rebate;
+    return $S<$B ? $upandout_call/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
 }
 
 
@@ -460,15 +458,16 @@ sub sharkfincall {
 =cut
 
 sub sharkfinput {
-    my ($S, $K, $B, $t, $mu, $sigma, $r_q, $type, $rebate) = @_;
+    my ($S, $K, $t, $r_q, $mu, $sigma, $B, $rebate) = @_;
 
-    my downandout_put = 
-                        vanilla_put($S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($S, $B, $t, $r_q, $mu, $sigma) 
-                        - ($K-$B) * put($S, $B, $t, $r_q, $mu, $sigma)
+    my $downandout_put = vanilla_put($S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($S, $B, $t, $r_q, $mu, $sigma) 
+                        - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($S, $B, $t, $r_q, $mu, $sigma)
                         - $S/$B * (vanilla_put($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($B**2/$S, $B, $t, $r_q, $mu, $sigma)
-                        - ($K-$B) * put($B**2/$S, $B, $t, $r_q, $mu, $sigma));
-    return upandout_call unless rebate;
-    return $S>$B ? downandout_put/(1 - onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
+                        - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($B**2/$S, $B, $t, $r_q, $mu, $sigma));
+    return $downandout_put unless $rebate;
+    print "woa";
+    print "S is $S B is $B ,downput is $downandout_put \n";
+    return $S>$B ? $downandout_put/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
 }
 
 

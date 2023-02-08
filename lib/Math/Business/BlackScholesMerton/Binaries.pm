@@ -14,10 +14,6 @@ use POSIX qw(ceil);
 use Math::Trig;
 use Machine::Epsilon;
 
-# allow import of call put and onetouch formulas in NonBinaries for sharkfinf 
-use Exporter 'import';
-our @EXPORT_OK = qw(call put onetouch)
-
 # ABSTRACT: Algorithm of Math::Business::BlackScholesMerton::Binaries
 
 =head1 NAME
