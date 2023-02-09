@@ -465,8 +465,6 @@ sub sharkfinput {
                         - $S/$B * (vanilla_put($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($B**2/$S, $B, $t, $r_q, $mu, $sigma)
                         - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($B**2/$S, $B, $t, $r_q, $mu, $sigma));
     return $downandout_put unless $rebate;
-    print "woa";
-    print "S is $S B is $B ,downput is $downandout_put \n";
     return $S>$B ? $downandout_put/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
 }
 
