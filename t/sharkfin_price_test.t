@@ -68,8 +68,8 @@ sub test_price {
     my $t             = $args->{t};
     my $mu            = $args->{mu};
     my $sigma         = $args->{vol};
-    my $ko_barrier         = $args->{ko_barrier};
-    my $rebate         = $args->{rebate};
+    my $ko_barrier    = $args->{ko_barrier};
+    my $rebate        = $args->{rebate};
 
     my $price;
 
@@ -77,11 +77,11 @@ sub test_price {
 
     my $func = \&$formula;
 
-    $price = $func->($spot, $strike, $t, $discount_rate, $mu, $sigma, $ko_barrier, $rebate);
+    $price = $func->($spot, $ko_barrier, $strike, $t, $discount_rate, $mu, $sigma, $rebate);
 
     my $diff = abs($price - $expected) / $expected;
 
-    cmp_ok($diff, '<', 0.08, 'Diff is within permissible range');
+    cmp_ok($diff, '<', 0.01, 'Diff is within permissible range');
 }
 
 done_testing;
