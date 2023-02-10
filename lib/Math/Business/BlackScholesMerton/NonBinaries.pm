@@ -416,26 +416,34 @@ sub _calculate_q {
     $sigma - volatility
     $mu - mean
     $r_q - interest rate
-    $rebate - 0: without , 1: with 
 
     References:
         https://people.maths.ox.ac.uk/howison/barriers.pdf
         https://docs.google.com/document/d/1_Omrwwy4FPB8VKSOyqBlCue3JZVVuiKl/edit
 
-
 =cut
 
 sub sharkfincall {
-    my ($S, $B, $K, $t, $r_q, $mu, $sigma, $rebate) = @_;
+    my ($S, $B, $K, $t, $r_q, $mu, $sigma) = @_;
 
     my $upandout_call = vanilla_call($S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($S, $B, $t, $r_q, $mu, $sigma) 
                         - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($S, $B, $t, $r_q, $mu, $sigma)
                         - $S/$B * (vanilla_call($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($B**2/$S, $B, $t, $r_q, $mu, $sigma)
                         - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($B**2/$S, $B, $t, $r_q, $mu, $sigma));
-    return $upandout_call unless $rebate;
-    return $S<$B ? $upandout_call/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
+    return $upandout_call;
 }
 
+=head2 sharkfincallr
+
+sharkfincall with rebate
+
+=cut
+
+sub sharkfincallr {
+    my ($S, $B, $K, $t, $r_q, $mu, $sigma) = @_;
+
+    return $S<$B ? sharkfincall($S, $B, $K, $t, $r_q, $mu, $sigma)/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
+}
 
 =head2 sharkfinput
 
@@ -464,9 +472,21 @@ sub sharkfinput {
                         - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($S, $B, $t, $r_q, $mu, $sigma)
                         - $S/$B * (vanilla_put($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($B**2/$S, $B, $t, $r_q, $mu, $sigma)
                         - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($B**2/$S, $B, $t, $r_q, $mu, $sigma));
-    return $downandout_put unless $rebate;
-    return $S>$B ? $downandout_put/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
+    return $downandout_put;
 }
+
+=head2 sharkfinputr
+
+sharkfinput with rebate
+
+=cut
+
+sub sharkfinputr {
+    my ($S, $B, $K, $t, $r_q, $mu, $sigma) = @_;
+
+    return $S>$B ? sharkfinput($S, $B, $K, $t, $r_q, $mu, $sigma)/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
+}
+
 
 
 1;
