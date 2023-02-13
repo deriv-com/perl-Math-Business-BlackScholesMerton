@@ -426,26 +426,19 @@ sub _calculate_q {
 sub sharkfincall {
     my ($S, $B, $K, $t, $r_q, $mu, $sigma) = @_;
 
+    return undef if $S > $B;
+
     my $upandout_call = vanilla_call($S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($S, $B, $t, $r_q, $mu, $sigma) 
                         - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($S, $B, $t, $r_q, $mu, $sigma)
                         - $S/$B * (vanilla_call($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($B**2/$S, $B, $t, $r_q, $mu, $sigma)
                         - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($B**2/$S, $B, $t, $r_q, $mu, $sigma));
-    return $upandout_call;
-}
+    return $upandout_call/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0));
 
-=head2 sharkfincallr
-
-sharkfincall with rebate
-
-=cut
-
-sub sharkfincallr {
-    my ($S, $B, $K, $t, $r_q, $mu, $sigma) = @_;
-
-    return $S<$B ? sharkfincall($S, $B, $K, $t, $r_q, $mu, $sigma)/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
 }
 
 =head2 sharkfinput
+
+    Shark Fin Put Contract
 
     Description of parameters:
 
@@ -456,7 +449,6 @@ sub sharkfincallr {
     $sigma - volatility
     $mu - mean
     $r_q - interest rate
-    $rebate - 0: without , 1: with 
 
     References:
         https://people.maths.ox.ac.uk/howison/barriers.pdf
@@ -468,25 +460,46 @@ sub sharkfincallr {
 sub sharkfinput {
     my ($S, $B, $K, $t, $r_q, $mu, $sigma, $rebate) = @_;
 
+    return undef if $S < $B;
+
     my $downandout_put = vanilla_put($S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($S, $B, $t, $r_q, $mu, $sigma) 
                         - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($S, $B, $t, $r_q, $mu, $sigma)
                         - $S/$B * (vanilla_put($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($B**2/$S, $B, $t, $r_q, $mu, $sigma)
                         - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($B**2/$S, $B, $t, $r_q, $mu, $sigma));
-    return $downandout_put;
+    return $downandout_put/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0));
+
 }
 
-=head2 sharkfinputr
+=head2 sharkfinkocall
 
-sharkfinput with rebate
+    Shark Fin Call at Expiry Knock Out
 
 =cut
 
-sub sharkfinputr {
+sub sharkfinkocall {
     my ($S, $B, $K, $t, $r_q, $mu, $sigma) = @_;
 
-    return $S>$B ? sharkfinput($S, $B, $K, $t, $r_q, $mu, $sigma)/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0)) : undef;
+    return undef if $S > $B;
+
+    my $upandout_call = vanilla_call($S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($S, $B, $t, $r_q, $mu, $sigma) 
+                        - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($S, $B, $t, $r_q, $mu, $sigma);
+    return $upandout_call/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0));
 }
 
+=head2 sharkfinkoput
 
+    Shark Fin Put at Expiry Knock Out
 
+=cut
+
+sub sharkfinkoput {
+    my ($S, $B, $K, $t, $r_q, $mu, $sigma, $rebate) = @_;
+
+    return undef if $S < $B;
+
+    my $downandout_put = vanilla_put($S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($S, $B, $t, $r_q, $mu, $sigma) 
+                        - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($S, $B, $t, $r_q, $mu, $sigma);
+    return $downandout_put/(1 - Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0));
+
+}
 1;

@@ -28,7 +28,7 @@ subtest 'sharkfin price test' => sub {
         my $sharkfinput_price  = $line->{sharkfinput_price};
 
         test_price({
-                type          => 'sharkfincallr',
+                type          => 'sharkfincall',
                 strike        => $strike,
                 spot          => $spot,
                 discount_rate => $r_q,
@@ -42,7 +42,7 @@ subtest 'sharkfin price test' => sub {
         );
 
         test_price({
-                type          => 'sharkfinputr',
+                type          => 'sharkfinput',
                 strike        => $strike,
                 spot          => $spot,
                 discount_rate => $r_q,
