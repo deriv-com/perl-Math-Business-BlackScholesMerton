@@ -434,7 +434,7 @@ sub _calculate_q {
 =cut
 
 sub sharkfinkocall {
-    my ($S, $B, $K, $t, $r_q, $mu, $sigma) = @_;
+    my ($S, $B, $K, $t, $r_q, $mu, $sigma, $rebate) = @_;
 
     return undef if $S > $B;
 
