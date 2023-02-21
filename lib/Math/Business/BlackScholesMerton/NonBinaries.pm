@@ -518,7 +518,7 @@ sub sharkfincall {
 
     my $upandout_call = vanilla_call($S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($S, $B, $t, $r_q, $mu, $sigma) 
                         - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($S, $B, $t, $r_q, $mu, $sigma);
-    return $upandout_call/(1 - $rebate * Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0));
+    return $upandout_call/(1 - $rebate * Math::Business::BlackScholesMerton::Binaries::call($S, $B, $t, $r_q, $mu, $sigma));
 }
 
 =head2 sharkfinput
@@ -551,7 +551,7 @@ sub sharkfinput {
 
     my $downandout_put = vanilla_put($S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($S, $B, $t, $r_q, $mu, $sigma) 
                         - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($S, $B, $t, $r_q, $mu, $sigma);
-    return $downandout_put/(1 - $rebate * Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0));
+    return $downandout_put/(1 - $rebate * Math::Business::BlackScholesMerton::Binaries::put($S, $B, $t, $r_q, $mu, $sigma));
 
 }
 1;
