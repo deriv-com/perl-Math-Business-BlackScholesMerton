@@ -9,29 +9,49 @@ use Math::Business::BlackScholesMerton::NonBinaries;
 use Format::Util::Numbers qw(roundnear);
 use Text::CSV::Slurp;
 
-my $pricing_parameters = Text::CSV::Slurp->load(file => 't/test_data/sharkfin_data.csv');
+my $pricing_parameters = Text::CSV::Slurp->load(file => 't/test_data/Sharkfin_prices.csv');
 
-my $filename = 'qinfeng_test_run.csv';
-open(my $fh, '>>', $filename) or die "Could not open file '$filename' $!";
-print $fh "spot,t,sigma,strike,ko_barrier,rebate,sharkfin_call_price_alex,sharkfin_call_price_qinfeng,is_same\n";
+my $contract_type = ["sharkfinkocall", "sharkfincall", "sharkfinkoput", "sharkfinput"];
+foreach my $type (@$contract_type) {
+    my $filename = "qinfeng_test_run_$type.csv";
+    open(my $fh, '>>', $filename) or die "Could not open file '$filename' $!";
+    print $fh "spot,t,sigma,strike,ko_barrier,rebate,price_alex,price_qinfeng,is_same\n";
+}
 
 subtest 'sharkfin price test' => sub {
     foreach my $line (@$pricing_parameters) {
-        my $spot               = $line->{spot};
-        my $strike             = $line->{strike};
-        my $duration           = $line->{duration};
-        my $r_q                = 0;
-        my $mu                 = 0;
-        my $rebate             = $line->{rebate};
-        my $vol                = $line->{vol};
-        my $ko_barrier_call    = $line->{barrier_for_call};
-        my $ko_barrier_put     = $line->{barrier_for_put};
-        my $sharkfincall_price = $line->{sharkfin_call_price};
-        my $sharkfinput_price  = $line->{sharkfin_put_price};
+        my $spot                 = $line->{Spot};
+        my $strike_call          = $line->{Strike_call};
+        my $strike_put           = $line->{Strike_put};
+        my $duration             = $line->{Maturity};
+        my $r_q                  = 0;
+        my $mu                   = 0;
+        my $rebate               = $line->{Rebate};
+        my $vol                  = $line->{Volatility};
+        my $ko_barrier_call      = $line->{Barrier_call};
+        my $ko_barrier_put       = $line->{Barrier_put};
+        my $sharkfinKOcall_price = $line->{Sharkfin_KO_call};
+        my $sharkfincall_price   = $line->{Sharkfin_XP_call};
+        my $sharkfinKOput_price  = $line->{Sharkfin_KO_put};
+        my $sharkfinput_price    = $line->{Sharkfin_XP_put};
+
+        test_price({
+                type          => 'sharkfinkocall',
+                strike        => $strike_call,
+                spot          => $spot,
+                discount_rate => $r_q,
+                t             => $duration,
+                mu            => $mu,
+                vol           => $vol,
+                ko_barrier    => $ko_barrier_call,
+                rebate        => $rebate
+            },
+            $sharkfinKOcall_price
+        );
 
         test_price({
                 type          => 'sharkfincall',
-                strike        => $strike,
+                strike        => $strike_call,
                 spot          => $spot,
                 discount_rate => $r_q,
                 t             => $duration,
@@ -44,8 +64,22 @@ subtest 'sharkfin price test' => sub {
         );
 
         test_price({
+                type          => 'sharkfinkoput',
+                strike        => $strike_put,
+                spot          => $spot,
+                discount_rate => $r_q,
+                t             => $duration,
+                mu            => $mu,
+                vol           => $vol,
+                ko_barrier    => $ko_barrier_put,
+                rebate        => $rebate
+            },
+            $sharkfinKOput_price
+        );
+
+        test_price({
                 type          => 'sharkfinput',
-                strike        => $strike,
+                strike        => $strike_put,
                 spot          => $spot,
                 discount_rate => $r_q,
                 t             => $duration,
@@ -86,7 +120,7 @@ sub test_price {
     my $s = "price $price | exp $expected";
     use Data::Printer;
     p $s;
-    my $filename = 'qinfeng_test_run.csv';
+    my $filename = "qinfeng_test_run_$type.csv";
     open(my $fh, '>>', $filename) or die "Could not open file '$filename' $!";
 
     my $is_same = 1;
