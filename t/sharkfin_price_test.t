@@ -116,17 +116,6 @@ sub test_price {
     $price = $func->($spot, $ko_barrier, $strike, $t, $discount_rate, $mu, $sigma, $rebate);
 
     my $diff = abs($price - $expected) / $expected;
-
-    my $s = "price $price | exp $expected";
-    use Data::Printer;
-    p $s;
-    my $filename = "qinfeng_test_run_$type.csv";
-    open(my $fh, '>>', $filename) or die "Could not open file '$filename' $!";
-
-    my $is_same = 1;
-    $is_same = 0 if $diff > 0.01;
-    print $fh "$spot,$t,$sigma,$strike,$ko_barrier,$rebate,$expected,$price,$is_same\n";
-
     cmp_ok($diff, '<', 0.01, 'Diff is within permissible range');
 }
 
