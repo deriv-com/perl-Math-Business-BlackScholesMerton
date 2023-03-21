@@ -448,7 +448,7 @@ sub sharkfinkocall {
 
 =head2 sharkfinkoput
 
-    Sharkfin Put with KO (path dependant) 
+    Sharkfin Put with KO (path dependant)
 
     Description of the contract:
 
