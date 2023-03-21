@@ -407,7 +407,7 @@ sub _calculate_q {
 
 =head2 sharkfinkocall
 
-    Sharkfin Call with KO (path dependant) 
+    Sharkfin Call with KO (path dependant)
 
     Description of the contract:
 
