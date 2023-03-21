@@ -11,13 +11,6 @@ use Text::CSV::Slurp;
 
 my $pricing_parameters = Text::CSV::Slurp->load(file => 't/test_data/Sharkfin_prices.csv');
 
-my $contract_type = ["sharkfinkocall", "sharkfincall", "sharkfinkoput", "sharkfinput"];
-foreach my $type (@$contract_type) {
-    my $filename = "qinfeng_test_run_$type.csv";
-    open(my $fh, '>>', $filename) or die "Could not open file '$filename' $!";
-    print $fh "spot,t,sigma,strike,ko_barrier,rebate,price_alex,price_qinfeng,is_same\n";
-}
-
 subtest 'sharkfin price test' => sub {
     foreach my $line (@$pricing_parameters) {
         my $spot                 = $line->{Spot};
@@ -30,9 +23,9 @@ subtest 'sharkfin price test' => sub {
         my $vol                  = $line->{Volatility};
         my $ko_barrier_call      = $line->{Barrier_call};
         my $ko_barrier_put       = $line->{Barrier_put};
-        my $sharkfinKOcall_price = $line->{Sharkfin_KO_call};
+        my $sharkfinko_call_price = $line->{Sharkfin_KO_call};
         my $sharkfincall_price   = $line->{Sharkfin_XP_call};
-        my $sharkfinKOput_price  = $line->{Sharkfin_KO_put};
+        my $sharkfinko_put_price  = $line->{Sharkfin_KO_put};
         my $sharkfinput_price    = $line->{Sharkfin_XP_put};
 
         test_price({
@@ -46,7 +39,7 @@ subtest 'sharkfin price test' => sub {
                 ko_barrier    => $ko_barrier_call,
                 rebate        => $rebate
             },
-            $sharkfinKOcall_price
+            $sharkfinko_call_price
         );
 
         test_price({
@@ -74,7 +67,7 @@ subtest 'sharkfin price test' => sub {
                 ko_barrier    => $ko_barrier_put,
                 rebate        => $rebate
             },
-            $sharkfinKOput_price
+            $sharkfinko_put_price
         );
 
         test_price({
