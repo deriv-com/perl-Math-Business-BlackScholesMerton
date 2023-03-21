@@ -495,7 +495,7 @@ sub sharkfinkoput {
     Description of the contract:
 
     The buyer of the Shark fin call will participate in any increase above a predetermined strike.
-    However if the price is higher than a predefined barrier at expiry, the client will earn a rebate instead 
+    However if the price is higher than a predefined barrier at expiry, the client will earn a rebate instead
     of the difference between strike and final spot price.
 
     Description of parameters:
@@ -528,7 +528,7 @@ sub sharkfincall {
     Description of the contract:
 
     The buyer of the Shark fin put will participate in any decrease below a predetermined strike.
-    However if the price is lower than a predefined barrier at expiry, the client will earn a rebate instead 
+    However if the price is lower than a predefined barrier at expiry, the client will earn a rebate instead
     of the difference between strike and final spot price.
 
     Description of parameters:
