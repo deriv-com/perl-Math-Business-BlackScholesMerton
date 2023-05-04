@@ -7,6 +7,7 @@ use List::Util qw(min max);
 use Math::CDF qw(pnorm);
 use POSIX qw(ceil);
 use Machine::Epsilon;
+use Math::Business::BlackScholesMerton::Binaries;
 
 use constant PI => 3.14159265359;
 
@@ -404,4 +405,153 @@ sub _calculate_q {
     return (2 / $l) * exp(($mu / $sigma**2) * ($y - $x)) * exp($alpha * $y) * $z;
 }
 
+=head2 sharkfinkocall
+
+    Sharkfin Call with KO (path dependant) 
+
+    Description of the contract:
+
+    The buyer of the Shark fin KO call will participate in any increase above a predetermined strike.
+    However the client bears the risk that the Shark fin option will be knocked out and early terminated if the asset
+    spot price breaches a predetermined barrier. In this last case, the contract expire automatically and the client
+    will receive a rebate equal to a multiple of its initial stake.
+
+    Description of parameters:
+
+    $S - spot
+    $K - strike
+    $B - KO barrier
+    $t - time in years
+    $sigma - volatility
+    $mu - mean
+    $r_q - interest rate
+    $rebate - rebate after knock out defined as a percentage of the premium
+
+    References:
+        https://people.maths.ox.ac.uk/howison/barriers.pdf
+        https://docs.google.com/document/d/1_Omrwwy4FPB8VKSOyqBlCue3JZVVuiKl/edit
+
+=cut
+
+sub sharkfinkocall {
+    my ($S, $B, $K, $t, $r_q, $mu, $sigma, $rebate) = @_;
+
+    return undef if $S > $B;
+
+    my $upandout_call = vanilla_call($S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($S, $B, $t, $r_q, $mu, $sigma) 
+                        - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($S, $B, $t, $r_q, $mu, $sigma)
+                        - $S/$B * (vanilla_call($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($B**2/$S, $B, $t, $r_q, $mu, $sigma)
+                        - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($B**2/$S, $B, $t, $r_q, $mu, $sigma));
+    return $upandout_call/(1 - $rebate * Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0));
+
+}
+
+=head2 sharkfinkoput
+
+    Sharkfin Put with KO (path dependant) 
+
+    Description of the contract:
+
+    The buyer of the Shark fin KO put will participate in any decrease below a predetermined strike.
+    However the client bears the risk that the Shark fin option will be knocked out and early terminated if the asset
+    spot price breaches a predetermined barrier. In this last case, the contract expire automatically and the client
+    will receive a rebate equal to a multiple of its initial stake.
+
+    Description of parameters:
+
+    $S - spot
+    $K - strike
+    $B - KO barrier
+    $t - time in years
+    $sigma - volatility
+    $mu - mean
+    $r_q - interest rate
+    $rebate - rebate after knowk out defined as a percentage of the premium
+
+    References:
+        https://people.maths.ox.ac.uk/howison/barriers.pdf
+        https://docs.google.com/document/d/1_Omrwwy4FPB8VKSOyqBlCue3JZVVuiKl/edit
+
+
+=cut
+
+sub sharkfinkoput {
+    my ($S, $B, $K, $t, $r_q, $mu, $sigma, $rebate) = @_;
+
+    return undef if $S < $B;
+
+    my $downandout_put = vanilla_put($S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($S, $B, $t, $r_q, $mu, $sigma) 
+                        - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($S, $B, $t, $r_q, $mu, $sigma)
+                        - $S/$B * (vanilla_put($B**2/$S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($B**2/$S, $B, $t, $r_q, $mu, $sigma)
+                        - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($B**2/$S, $B, $t, $r_q, $mu, $sigma));
+    return $downandout_put/(1 - $rebate * Math::Business::BlackScholesMerton::Binaries::onetouch($S, $B, $t, $r_q, $mu, $sigma, 0));
+
+}
+
+=head2 sharkfincall
+
+    Shark Fin Call without Knock Out
+
+    Description of the contract:
+
+    The buyer of the Shark fin call will participate in any increase above a predetermined strike.
+    However if the price is higher than a predefined barrier at expiry, the client will earn a rebate instead 
+    of the difference between strike and final spot price.
+
+    Description of parameters:
+
+    $S - spot
+    $K - strike
+    $B - KO barrier
+    $t - time in years
+    $sigma - volatility
+    $mu - mean
+    $r_q - interest rate
+    $rebate - rebate after knowk out defined as a percentage of the premium
+
+=cut
+
+sub sharkfincall {
+    my ($S, $B, $K, $t, $r_q, $mu, $sigma, $rebate) = @_;
+
+    return undef if $S > $B;
+
+    my $upandout_call = vanilla_call($S, $K, $t, $r_q, $mu, $sigma) - vanilla_call($S, $B, $t, $r_q, $mu, $sigma) 
+                        - ($B-$K) * Math::Business::BlackScholesMerton::Binaries::call($S, $B, $t, $r_q, $mu, $sigma);
+    return $upandout_call/(1 - $rebate * Math::Business::BlackScholesMerton::Binaries::call($S, $B, $t, $r_q, $mu, $sigma));
+}
+
+=head2 sharkfinput
+
+    Shark Fin put without Knock Out
+
+    Description of the contract:
+
+    The buyer of the Shark fin put will participate in any decrease below a predetermined strike.
+    However if the price is lower than a predefined barrier at expiry, the client will earn a rebate instead 
+    of the difference between strike and final spot price.
+
+    Description of parameters:
+
+    $S - spot
+    $K - strike
+    $B - KO barrier
+    $t - time in years
+    $sigma - volatility
+    $mu - mean
+    $r_q - interest rate
+    $rebate - rebate after knowk out defined as a percentage of the premium
+
+=cut
+
+sub sharkfinput {
+    my ($S, $B, $K, $t, $r_q, $mu, $sigma, $rebate) = @_;
+
+    return undef if $S < $B;
+
+    my $downandout_put = vanilla_put($S, $K, $t, $r_q, $mu, $sigma) - vanilla_put($S, $B, $t, $r_q, $mu, $sigma) 
+                        - ($K-$B) * Math::Business::BlackScholesMerton::Binaries::put($S, $B, $t, $r_q, $mu, $sigma);
+    return $downandout_put/(1 - $rebate * Math::Business::BlackScholesMerton::Binaries::put($S, $B, $t, $r_q, $mu, $sigma));
+
+}
 1;
