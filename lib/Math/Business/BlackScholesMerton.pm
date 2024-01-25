@@ -8,7 +8,7 @@ our $VERSION = '1.25';
 
 =head1 NAME
 
-Math::Business::BlackScholesMerton
+Math::Business::BlackScholesMerton - Algorithm of Math::Business::BlackScholesMerton for binary and non-binary options
 
 =head1 DESCRIPTION
 
